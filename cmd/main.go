@@ -1,6 +1,6 @@
 package main
 
 func main() {
-	Scraper()
-	// StartServer()
+	// Scraper()
+	StartServer()
 }

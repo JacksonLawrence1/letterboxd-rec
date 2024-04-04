@@ -1,0 +1,11 @@
+<div
+  id="results" class="bg-gray-800 border-2 border-gray-900 flex flex-col w-max mx-auto p-8 rounded gap-4 mb-12"
+>
+  <h1 class="text-3xl">Results</h1>
+
+  <p>Time taken {{ .Time }}</p>
+
+  {{ if .ReturnedMovies }} {{ range .ReturnedMovies }}
+  <li>{{ .Title }}</li>
+  {{end}} {{end}}
+</div>
