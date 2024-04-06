@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"slices"
-	"strconv"
 	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
 )
 
+// will use this later
 type Movie struct {
 	Title string
 	Slug  string
@@ -81,17 +81,8 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int 
 	return movies
 }
 
-func Scraper(movie string, maxUsersStr string, threadsStr string) ([]string, time.Duration) {
+func Scraper(movie string, maxUsers int, threads int) ([]string, time.Duration) {
 	start := time.Now()
-
-	// convert strings to ints
-	maxUsers, userErr := strconv.Atoi(maxUsersStr)
-	threads, threadsErr := strconv.Atoi(threadsStr)
-
-	if movie == "" || userErr != nil || threadsErr != nil {
-		fmt.Println("Invalid inputs: ", movie, maxUsers, threads)
-		return nil, time.Since(start)
-	}
 
 	// this users the movie's film slug, make sure you look up the correct one
 	users := scrapeUsers(movie, maxUsers)

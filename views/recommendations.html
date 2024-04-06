@@ -1,0 +1,12 @@
+<div
+  id="recommendations" 
+>
+  <h1 class="text-3xl">Here are some Movies you may like: </h1>
+
+  <div class="flex gap-8">
+    {{ range .Movies }}
+        {{ .Title }}
+    {{end}}
+  </div>
+ 
+</div>

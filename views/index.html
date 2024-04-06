@@ -17,42 +17,27 @@
     <div class="flex flex-col gap-8">
       <form
         hx-post="/search"
-        hx-target="#results"
-        hx-swap="outerHTML"
-        class="mx-auto w-min mt-8 flex bg-gray-800 flex-col gap-8 border-2 border-gray-900 p-12 rounded-lg items-center"
+        class="mx-auto w-max mt-8 flex bg-gray-800 flex-col gap-8 border-2 border-gray-900 p-12 rounded-lg items-center"
       >
-        <h1 class="text-3xl">Benchmark</h1>
-        <div class="flex gap-8 justify-center items-center">
-          {{ range .Movies }}
-          <div
-            class="flex flex-col items-center border p-4 rounded border-gray-700"
-          >
-            <input type="radio" name="movie" value="{{ .Slug }}" required />
-            <label>{{ .Title }}</label>
-          </div>
-          {{ end }}
-        </div>
-        <div class="flex flex-col gap-4 items-center">
-          <h1>Amount of Users</h1>
-          <input
-            class="p-2 bg-gray-700 rounded w-max"
-            type="number"
-            name="users"
-            required
-          />
-        </div>
-        <h1>Amount of Threads</h1>
-        <div class="flex gap-8 border border-gray-700 p-4 rounded">
-          {{ range .Threads }}
-          <div class="flex flex-col items-center p-4 rounded border-gray-700">
-            <input type="radio" name="threads" value="{{ .Count }}" required />
-            <label>{{ .Count }}</label>
-          </div>
-          {{end}}
-        </div>
-        <button class="bg-gray-900 text-gray-300 p-4 rounded-lg">Submit</button>
+      <h1 class="text-3xl">Search for a Movie</h1>
+        <input
+          type="text"
+          name="search"
+          placeholder="Movie Title"
+          class="p-2 rounded-lg bg-gray-700 border-2 border-gray-900 text-gray-300"
+          required
+          oninvalid="this.setCustomValidity('Please enter a valid movie title.')"
+          oninput="this.setCustomValidity('')"
+        />
+        <button
+          type="submit"
+          class="bg-gray-900 text-gray-300 p-2 rounded-lg"
+        >
+          Search
+        </button>
       </form>
-      <div id="results"></div>
+      <div id="recommendations">
+      </div>
     </div>
   </body>
 </html>
