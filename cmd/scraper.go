@@ -3,17 +3,22 @@ package main
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
 )
 
-// will use this later
-type Movie struct {
-	Title string
-	Slug  string
-	Id    string
+// takes the total users for the movie and randomises which pages to scrape
+func randomise(totalUsers int, targetPages int) []int {
+	// based on the total users, calculate the pages it has
+	pages := totalUsers/25 + 1
+
+	// select targetPages randomly between 1 and pages (no duplicates)
+	var randomPages = make([]int, pages) // TODO
+
+	return randomPages
 }
 
 // gets the usernames of user's who have this movie in their top 4
@@ -47,7 +52,7 @@ func scrapeUsers(movie string, maxUsers int) []string {
 }
 
 // for each user, add their 4 favourites to a map
-func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int {
+func scrapeFavourites(users []string, maxUsers int, threads int) map[int]int {
 	c := colly.NewCollector()
 
 	if maxUsers == -1 {
@@ -61,12 +66,15 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int 
 	)
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
-	movies := make(map[string]int) // map movie's slug to number of users who like it
+	movies := make(map[int]int) // map movie's slug to number of users who like it
 
 	c.OnHTML("section#favourites", func(e *colly.HTMLElement) {
 		// add the 4 favourites to the map
 		e.ForEach("div.poster", func(_ int, e *colly.HTMLElement) {
-			movies[e.Attr("data-film-slug")]++
+			id, err := strconv.Atoi(e.Attr("data-film-id"))
+			if err == nil {
+				movies[id]++
+			}
 		})
 	})
 
@@ -81,7 +89,7 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int 
 	return movies
 }
 
-func Scraper(movie string, maxUsers int, threads int) ([]string, time.Duration) {
+func Scraper(movie string, maxUsers int, threads int) ([]int, time.Duration) {
 	start := time.Now()
 
 	// this users the movie's film slug, make sure you look up the correct one
@@ -90,12 +98,13 @@ func Scraper(movie string, maxUsers int, threads int) ([]string, time.Duration) 
 	// depending on how many users, this could take a while
 	movies := scrapeFavourites(users, maxUsers, threads)
 
-	keys := make([]string, 0, len(movies))
+	keys := make([]int, 0, len(movies))
 	for k := range movies {
 		keys = append(keys, k)
 	}
 
-	slices.SortFunc(keys, func(i string, j string) int {
+	// sort the movies by the number of users who like it in descending order
+	slices.SortFunc(keys, func(i int, j int) int {
 		return movies[j] - movies[i]
 	})
 

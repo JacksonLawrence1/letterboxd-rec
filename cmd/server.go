@@ -47,8 +47,11 @@ func StartServer() {
 		// Use the Scraper
 		movies, _ := Scraper(movie, 5, 4) // movie, maxusers, threads
 
+		// Use the LookUp to get the movie info
+		// movieData, _ := LookUpMovies(movies)
+
 		for i := 0; i < len(movies); i++ {
-			data["Movies"] = append(data["Movies"].([]Movie), Movie{Title: movies[i], Slug: movies[i]})
+			data["Movies"] = append(data["Movies"].([]Movie), Movie{Id: movies[i]})
 		}
 
 		return c.Render(200, "recommendations.html", nil)

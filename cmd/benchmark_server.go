@@ -16,6 +16,11 @@ type Time struct {
 	Time time.Duration
 }
 
+type BenchMarkMovie struct {
+	Title string
+	Slug  string
+}
+
 func StartBenchmarkServer() {
 	e := echo.New()
 
@@ -27,7 +32,7 @@ func StartBenchmarkServer() {
 
 	// render index.html
 	e.GET("/", func(c echo.Context) error {
-		data["Movies"] = []Movie{
+		data["Movies"] = []BenchMarkMovie{
 			{Title: "Apocalypse Now", Slug: "apocalypse-now"},
 			{Title: "Citizen Kane", Slug: "citizen-kane"},
 			{Title: "Parasite", Slug: "parasite-2019"},
@@ -72,7 +77,7 @@ func StartBenchmarkServer() {
 
 		// right now it shows the movie you chose, but we should remove it
 		for i := 0; i < min(5, len(movies)); i++ {
-			data["ReturnedMovies"] = append(data["ReturnedMovies"].([]Movie), Movie{Title: movies[i], Slug: movies[i]})
+			data["ReturnedMovies"] = append(data["ReturnedMovies"].([]Movie), Movie{Id: movies[i]})
 		}
 
 		data["Time"] = Time{Time: time}
