@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
@@ -22,10 +21,10 @@ func randomise(totalUsers int, targetPages int) []int {
 }
 
 // gets the usernames of user's who have this movie in their top 4
-func scrapeUsers(movie string, maxUsers int) []string {
+func scrapeUsers(movie string, maxUsers int, threads int) []string {
 	c := colly.NewCollector()
 
-	var users []string
+	users := []string{}
 
 	c.OnHTML("td.table-person", func(e *colly.HTMLElement) {
 		if maxUsers != -1 && len(users) >= maxUsers {
@@ -37,6 +36,11 @@ func scrapeUsers(movie string, maxUsers int) []string {
 
 	pages := maxUsers/25 + 1
 
+	q, _ := queue.New(
+		threads,
+		&queue.InMemoryQueueStorage{MaxSize: pages},
+	)
+
 	// letterboxd sorts users in alphabetical order - depending on you, this could be a good or bad thing
 
 	// future improvement: randomise the pages
@@ -45,14 +49,16 @@ func scrapeUsers(movie string, maxUsers int) []string {
 		if maxUsers != -1 && len(users) >= maxUsers {
 			break
 		}
-		c.Visit(fmt.Sprintf("https://letterboxd.com/film/%s/fans/page/%d/", movie, i))
+		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/fans/page/%d/", movie, i))
 	}
+
+	q.Run(c)
 
 	return users
 }
 
 // for each user, add their 4 favourites to a map
-func scrapeFavourites(users []string, maxUsers int, threads int) map[int]int {
+func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int {
 	c := colly.NewCollector()
 
 	if maxUsers == -1 {
@@ -66,15 +72,12 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[int]int {
 	)
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
-	movies := make(map[int]int) // map movie's slug to number of users who like it
+	movies := make(map[string]int) // map movie's slug to number of users who like it
 
 	c.OnHTML("section#favourites", func(e *colly.HTMLElement) {
 		// add the 4 favourites to the map
 		e.ForEach("div.poster", func(_ int, e *colly.HTMLElement) {
-			id, err := strconv.Atoi(e.Attr("data-film-id"))
-			if err == nil {
-				movies[id]++
-			}
+			movies[e.Attr("data-film-slug")]++
 		})
 	})
 
@@ -89,24 +92,72 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[int]int {
 	return movies
 }
 
-func Scraper(movie string, maxUsers int, threads int) ([]int, time.Duration) {
-	start := time.Now()
+func convertToTMDBIds(movieSlugs []string, threads int) []int {
+	c := colly.NewCollector()
+
+	q, _ := queue.New(
+		threads,
+		&queue.InMemoryQueueStorage{MaxSize: len(movieSlugs)},
+	)
+
+	TMDBIds := []int{}
+
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		// get the TMDB id from the data attribute
+		id, err := strconv.Atoi(e.Attr("data-tmdb-id"))
+
+		if err == nil && id != 0 {
+			TMDBIds = append(TMDBIds, id)
+		}
+	})
+
+	// scrape the TMDB id from the movie's letterboxd page
+	for _, id := range movieSlugs {
+		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/", id))
+	}
+
+	q.Run(c)
+
+	return TMDBIds
+}
+
+func MovieExists(movie string) bool {
+	c := colly.NewCollector()
+
+	exists := false
+
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		exists = true
+	})
+
+	c.Visit(fmt.Sprintf("https://letterboxd.com/film/%s/", movie))
+	return exists
+}
+
+func Scraper(movie string, maxUsers int, threads int) ([]int, error) {
+	// ensure the movie exists on letterboxd
+	if !MovieExists(movie) {
+		return nil, fmt.Errorf("Movie not found on Letterboxd")
+	}
 
 	// this users the movie's film slug, make sure you look up the correct one
-	users := scrapeUsers(movie, maxUsers)
+	users := scrapeUsers(movie, maxUsers, threads)
 
 	// depending on how many users, this could take a while
 	movies := scrapeFavourites(users, maxUsers, threads)
 
-	keys := make([]int, 0, len(movies))
+	keys := make([]string, 0, len(movies))
 	for k := range movies {
 		keys = append(keys, k)
 	}
 
 	// sort the movies by the number of users who like it in descending order
-	slices.SortFunc(keys, func(i int, j int) int {
+	slices.SortFunc(keys, func(i string, j string) int {
 		return movies[j] - movies[i]
 	})
 
-	return keys, time.Since(start)
+	// because letterboxd doesn't store the TMDB id on the favourites page, scrape it from the movie details page
+	ids := convertToTMDBIds(keys, threads)
+
+	return ids, nil
 }

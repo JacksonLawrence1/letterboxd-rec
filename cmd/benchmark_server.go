@@ -80,8 +80,6 @@ func StartBenchmarkServer() {
 			data["ReturnedMovies"] = append(data["ReturnedMovies"].([]Movie), Movie{Id: movies[i]})
 		}
 
-		data["Time"] = Time{Time: time}
-
 		// ideally here we render what movies we found
 		return c.Render(200, "benchmark_results.html", data)
 	})

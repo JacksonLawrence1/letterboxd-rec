@@ -40,21 +40,22 @@ func StartServer() {
 		// possibilities
 		// - only have a small selection of movies
 		// - use TMBD API to search for the movies (might be difficult right now)
-		// movie := c.FormValue("movie")
-
-		movie := "parasite-2019"
+		movie := c.FormValue("movie")
 
 		// Use the Scraper
-		movies, _ := Scraper(movie, 5, 4) // movie, maxusers, threads
+		movies, err := Scraper(movie, 5, 4) // movie, maxusers, threads
 
-		// Use the LookUp to get the movie info
-		// movieData, _ := LookUpMovies(movies)
-
-		for i := 0; i < len(movies); i++ {
-			data["Movies"] = append(data["Movies"].([]Movie), Movie{Id: movies[i]})
+		if err != nil {
+			data["Error"] = "Movie not found"
+			return c.Render(200, "error.html", data)
 		}
 
-		return c.Render(200, "recommendations.html", nil)
+		// Use the LookUp to get the movie info
+		movieData, _ := LookUpMovies(movies)
+
+		data["Movies"] = movieData
+
+		return c.Render(200, "recommendations.html", data)
 	})
 
 	e.Logger.Fatal(e.Start(":8080"))

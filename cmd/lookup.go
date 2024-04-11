@@ -44,11 +44,22 @@ func LookUpMovie(id int, key string) (Movie, error) {
 	// only need the title, id and poster path (for now)
 	json.Unmarshal(body, &movie)
 
+	// if it unmarshals correctly, return the movie, otherwise return an error
+	if movie.Id == 0 || movie.Title == "" || movie.Poster_path == "" || movie.Release_date == "" {
+		return movie, fmt.Errorf("Movie ID not found on TMDB")
+	}
+
 	return movie, nil
 }
 
 func LookUpMovies(movieIds []int) ([]Movie, error) {
-	err := godotenv.Load("../.env")
+	// load the .env file
+	// this won't work locally, but should work in production
+	err := godotenv.Load()
+
+	// do this if you're running the server locally
+	// err := godotenv.Load("../.env")
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -61,11 +72,10 @@ func LookUpMovies(movieIds []int) ([]Movie, error) {
 	for _, id := range movieIds {
 		movie, err := LookUpMovie(id, key)
 
-		if err != nil {
-			return movies, err
+		// skip movies if they're not found
+		if err == nil {
+			movies = append(movies, movie)
 		}
-
-		movies = append(movies, movie)
 	}
 
 	return movies, nil

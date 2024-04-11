@@ -17,12 +17,13 @@
     <div class="flex flex-col gap-8">
       <form
         hx-post="/search"
+        hx-swap="outerHTML"
         class="mx-auto w-max mt-8 flex bg-gray-800 flex-col gap-8 border-2 border-gray-900 p-12 rounded-lg items-center"
       >
       <h1 class="text-3xl">Search for a Movie</h1>
         <input
           type="text"
-          name="search"
+          name="movie"
           placeholder="Movie Title"
           class="p-2 rounded-lg bg-gray-700 border-2 border-gray-900 text-gray-300"
           required
@@ -36,8 +37,6 @@
           Search
         </button>
       </form>
-      <div id="recommendations">
-      </div>
     </div>
   </body>
 </html>
