@@ -28,14 +28,28 @@ func StartServer() {
 
 	e.Renderer = newTemplate()
 
+	e.Static("/images", "images")
+	e.Static("/css", "css")
+
 	data := map[string]interface{}{}
 
+	// essentially the "backend" data of the movies
+	movieData := MovieData{"", 0, []int{}}
+	data["Movie"] = &movieData.movie
+
+	// the frontend data of the movies, e.g. full title, release date and poster
+	movies := []Movie{}
+	data["Movies"] = &movies
+
+	// whether there are more movies to load
+	data["HasMore"] = true
+
 	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index.html", nil)
+		return c.Render(200, "index", nil)
 	})
 
 	e.POST("/search", func(c echo.Context) error {
-		// first we need to sanitise the input
+		data["HasMore"] = true
 
 		// possibilities
 		// - only have a small selection of movies
@@ -43,17 +57,42 @@ func StartServer() {
 		movie := c.FormValue("movie")
 
 		// Use the Scraper
-		movies, err := Scraper(movie, 5, 4) // movie, maxusers, threads
+		moviesIds, err := Scraper(movie) // movie, maxusers, threads
 
 		if err != nil {
 			data["Error"] = "Movie not found"
 			return c.Render(200, "error.html", data)
 		}
 
-		// Use the LookUp to get the movie info
-		movieData, _ := LookUpMovies(movies)
+		movieData = MovieData{movie, 0, moviesIds}
 
-		data["Movies"] = movieData
+		// Use the LookUp to get the movie info
+		// this also overwrites the movie data
+		movies, _ = LookUpMovies(&movieData)
+
+		// very rarely will be less than 10 movies
+		if (movieData).IsFull() {
+			data["HasMore"] = false
+		}
+
+		return c.Render(200, "recommendations.html", data)
+	})
+
+	e.POST("/loadMore", func(c echo.Context) error {
+		// ensure we don't load movies if we don't have a movie loaded
+		if len(movieData.ids) == 0 {
+			data["Error"] = "No movies"
+			return c.Render(200, "error.html", data)
+		}
+
+		TMDBMovieInfo, _ := LookUpMovies(&movieData)
+
+		movies = append(movies, TMDBMovieInfo...) // concatenate the slices
+
+		// will not show the load more button if there are no more movies
+		if (movieData).IsFull() {
+			data["HasMore"] = false
+		}
 
 		return c.Render(200, "recommendations.html", data)
 	})

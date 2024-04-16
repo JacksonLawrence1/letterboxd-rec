@@ -1,0 +1,16 @@
+.htmx-indicator {
+  opacity: 0;
+  size: 0;
+  position: absolute;
+  transition: opacity 500ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+  opacity: 1;
+  position: relative;
+}
+
+.htmx-request.htmx-indicator {
+  opacity: 1;
+  position: relative;
+}

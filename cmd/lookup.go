@@ -11,13 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Movie struct {
-	Id           int
-	Title        string
-	Release_date string
-	Poster_path  string
-}
-
 func LookUpMovie(id int, key string) (Movie, error) {
 	movie := Movie{}
 
@@ -52,7 +45,7 @@ func LookUpMovie(id int, key string) (Movie, error) {
 	return movie, nil
 }
 
-func LookUpMovies(movieIds []int) ([]Movie, error) {
+func LookUpMovies(movieData *MovieData) ([]Movie, error) {
 	// load the .env file
 	// this won't work locally, but should work in production
 	err := godotenv.Load()
@@ -69,7 +62,7 @@ func LookUpMovies(movieIds []int) ([]Movie, error) {
 	movies := []Movie{}
 
 	// look up each movie on TMDB
-	for _, id := range movieIds {
+	for _, id := range (movieData.ids)[movieData.pointer:movieData.Increment()] {
 		movie, err := LookUpMovie(id, key)
 
 		// skip movies if they're not found

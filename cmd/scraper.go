@@ -21,32 +21,31 @@ func randomise(totalUsers int, targetPages int) []int {
 }
 
 // gets the usernames of user's who have this movie in their top 4
-func scrapeUsers(movie string, maxUsers int, threads int) []string {
+func scrapeUsers(movie string) []string {
 	c := colly.NewCollector()
 
 	users := []string{}
 
 	c.OnHTML("td.table-person", func(e *colly.HTMLElement) {
-		if maxUsers != -1 && len(users) >= maxUsers {
+		if len(users) >= MaxUsers {
 			return
 		}
 
 		users = append(users, e.ChildAttr("a", "href"))
 	})
 
-	pages := maxUsers/25 + 1
+	pages := MaxUsers/25 + 1
 
 	q, _ := queue.New(
-		threads,
+		Threads,
 		&queue.InMemoryQueueStorage{MaxSize: pages},
 	)
 
-	// letterboxd sorts users in alphabetical order - depending on you, this could be a good or bad thing
+	// letterboxd sorts users in alphabetical order, so we basically get the same users every time
 
 	// future improvement: randomise the pages
-
 	for i := 1; i <= pages; i++ {
-		if maxUsers != -1 && len(users) >= maxUsers {
+		if len(users) >= MaxUsers {
 			break
 		}
 		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/fans/page/%d/", movie, i))
@@ -58,17 +57,13 @@ func scrapeUsers(movie string, maxUsers int, threads int) []string {
 }
 
 // for each user, add their 4 favourites to a map
-func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int {
+func scrapeFavourites(users []string) map[string]int {
 	c := colly.NewCollector()
-
-	if maxUsers == -1 {
-		maxUsers = len(users)
-	}
 
 	// create a queue with a worker pool of 2 threads
 	q, _ := queue.New(
-		threads,
-		&queue.InMemoryQueueStorage{MaxSize: maxUsers},
+		Threads,
+		&queue.InMemoryQueueStorage{MaxSize: MaxUsers},
 	)
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
@@ -92,11 +87,11 @@ func scrapeFavourites(users []string, maxUsers int, threads int) map[string]int 
 	return movies
 }
 
-func convertToTMDBIds(movieSlugs []string, threads int) []int {
+func convertToTMDBIds(movieSlugs []string) []int {
 	c := colly.NewCollector()
 
 	q, _ := queue.New(
-		threads,
+		Threads,
 		&queue.InMemoryQueueStorage{MaxSize: len(movieSlugs)},
 	)
 
@@ -134,21 +129,24 @@ func MovieExists(movie string) bool {
 	return exists
 }
 
-func Scraper(movie string, maxUsers int, threads int) ([]int, error) {
+func Scraper(movie string) ([]int, error) {
 	// ensure the movie exists on letterboxd
 	if !MovieExists(movie) {
 		return nil, fmt.Errorf("Movie not found on Letterboxd")
 	}
 
 	// this users the movie's film slug, make sure you look up the correct one
-	users := scrapeUsers(movie, maxUsers, threads)
+	users := scrapeUsers(movie)
 
 	// depending on how many users, this could take a while
-	movies := scrapeFavourites(users, maxUsers, threads)
+	movies := scrapeFavourites(users)
 
 	keys := make([]string, 0, len(movies))
 	for k := range movies {
-		keys = append(keys, k)
+		// don't include the movie we're searching for
+		if k != movie {
+			keys = append(keys, k)
+		}
 	}
 
 	// sort the movies by the number of users who like it in descending order
@@ -157,7 +155,7 @@ func Scraper(movie string, maxUsers int, threads int) ([]int, error) {
 	})
 
 	// because letterboxd doesn't store the TMDB id on the favourites page, scrape it from the movie details page
-	ids := convertToTMDBIds(keys, threads)
+	ids := convertToTMDBIds(keys)
 
 	return ids, nil
 }
