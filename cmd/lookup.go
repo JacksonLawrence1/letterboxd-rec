@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func LookUpMovie(id int, key string) (Movie, error) {
+func KeyedLookUpMovie(id int, key string) (Movie, error) {
 	movie := Movie{}
 
 	// endpoint
@@ -42,12 +42,33 @@ func LookUpMovie(id int, key string) (Movie, error) {
 		return movie, fmt.Errorf("Movie ID not found on TMDB")
 	}
 
+	// get the year from the release date
+	movie.Release_date = movie.Release_date[:4]
+
 	return movie, nil
+}
+
+func LookUpMovie(movie string) (Movie, error) {
+	// load the .env file
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	key := os.Getenv("TMDB_API_KEY")
+
+	// get the TMDB id
+	id := convertToTMDBIds([]string{movie})[0]
+
+	// look up the movie on TMDB
+	movieData, err := KeyedLookUpMovie(id, key)
+
+	return movieData, err
 }
 
 func LookUpMovies(movieData *MovieData) ([]Movie, error) {
 	// load the .env file
-	// this won't work locally, but should work in production
 	err := godotenv.Load()
 
 	// do this if you're running the server locally
@@ -61,9 +82,12 @@ func LookUpMovies(movieData *MovieData) ([]Movie, error) {
 
 	movies := []Movie{}
 
+	// convert the slugs to TMDB ids
+	ids := convertToTMDBIds(movieData.slugs[movieData.pointer:movieData.Increment()])
+
 	// look up each movie on TMDB
-	for _, id := range (movieData.ids)[movieData.pointer:movieData.Increment()] {
-		movie, err := LookUpMovie(id, key)
+	for _, id := range ids {
+		movie, err := KeyedLookUpMovie(id, key)
 
 		// skip movies if they're not found
 		if err == nil {

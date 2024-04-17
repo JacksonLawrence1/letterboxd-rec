@@ -2,26 +2,36 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
 )
 
 // takes the total users for the movie and randomises which pages to scrape
-func randomise(totalUsers int, targetPages int) []int {
-	// based on the total users, calculate the pages it has
-	pages := totalUsers/25 + 1
+func randomise(fans int) map[int]bool {
+	maxFans := min(256, fans/25) // letterboxd seems to have a maximum of 256 pages
+
+	pages := max(1, MaxUsers/25)
 
 	// select targetPages randomly between 1 and pages (no duplicates)
-	var randomPages = make([]int, pages) // TODO
+	randomPages := make(map[int]bool)
+
+	for i := 0; i < pages; i++ {
+		num := rand.Intn(maxFans) + 1
+		if !randomPages[num] {
+			randomPages[num] = true
+		}
+	}
 
 	return randomPages
 }
 
 // gets the usernames of user's who have this movie in their top 4
-func scrapeUsers(movie string) []string {
+func scrapeUsers(movie string, fans int) []string {
 	c := colly.NewCollector()
 
 	users := []string{}
@@ -34,21 +44,17 @@ func scrapeUsers(movie string) []string {
 		users = append(users, e.ChildAttr("a", "href"))
 	})
 
-	pages := MaxUsers/25 + 1
+	pages := randomise(fans)
+	fmt.Println(pages)
 
 	q, _ := queue.New(
 		Threads,
-		&queue.InMemoryQueueStorage{MaxSize: pages},
+		&queue.InMemoryQueueStorage{MaxSize: len(pages) + 1},
 	)
 
-	// letterboxd sorts users in alphabetical order, so we basically get the same users every time
-
-	// future improvement: randomise the pages
-	for i := 1; i <= pages; i++ {
-		if len(users) >= MaxUsers {
-			break
-		}
-		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/fans/page/%d/", movie, i))
+	// gets random pages based on the total number of users
+	for key := range pages {
+		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/fans/page/%d/", movie, key))
 	}
 
 	q.Run(c)
@@ -116,7 +122,7 @@ func convertToTMDBIds(movieSlugs []string) []int {
 	return TMDBIds
 }
 
-func MovieExists(movie string) bool {
+func MovieExists(movie string) (bool, int) {
 	c := colly.NewCollector()
 
 	exists := false
@@ -125,18 +131,28 @@ func MovieExists(movie string) bool {
 		exists = true
 	})
 
-	c.Visit(fmt.Sprintf("https://letterboxd.com/film/%s/", movie))
-	return exists
+	fans := 0
+
+	c.OnHTML("li.js-route-fans", func(e *colly.HTMLElement) {
+		fanString := e.ChildAttr("a", "title")
+		fanString = strings.ReplaceAll(fanString[:len(fanString)-6], ",", "") // remove the "fans" part
+		fans, _ = strconv.Atoi(fanString)
+	})
+
+	c.Visit(fmt.Sprintf("https://letterboxd.com/film/%s/fans/", movie))
+	return exists, fans
 }
 
-func Scraper(movie string) ([]int, error) {
+func Scraper(movie string) ([]string, error) {
+	exists, fans := MovieExists(movie)
+
 	// ensure the movie exists on letterboxd
-	if !MovieExists(movie) {
+	if !exists {
 		return nil, fmt.Errorf("Movie not found on Letterboxd")
 	}
 
 	// this users the movie's film slug, make sure you look up the correct one
-	users := scrapeUsers(movie)
+	users := scrapeUsers(movie, fans)
 
 	// depending on how many users, this could take a while
 	movies := scrapeFavourites(users)
@@ -154,8 +170,5 @@ func Scraper(movie string) ([]int, error) {
 		return movies[j] - movies[i]
 	})
 
-	// because letterboxd doesn't store the TMDB id on the favourites page, scrape it from the movie details page
-	ids := convertToTMDBIds(keys)
-
-	return ids, nil
+	return keys, nil
 }

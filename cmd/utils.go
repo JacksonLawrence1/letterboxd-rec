@@ -7,21 +7,22 @@ var MaxUsers int = 100
 type Movie struct {
 	Id           int
 	Title        string
+	Slug         string
 	Release_date string
 	Poster_path  string
 }
 
 type MovieData struct {
-	movie   string
+	Movie   Movie
 	pointer int
-	ids     []int
+	slugs   []string
 }
 
 func (s *MovieData) Increment() int {
-	s.pointer = min(s.pointer+ItemsToShow, len(s.ids)) // how many movies at a time
+	s.pointer = min(s.pointer+ItemsToShow, len(s.slugs)) // how many movies at a time
 	return s.pointer
 }
 
 func (s *MovieData) IsFull() bool {
-	return s.pointer == len(s.ids)
+	return s.pointer == len(s.slugs)
 }

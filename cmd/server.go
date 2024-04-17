@@ -34,8 +34,8 @@ func StartServer() {
 	data := map[string]interface{}{}
 
 	// essentially the "backend" data of the movies
-	movieData := MovieData{"", 0, []int{}}
-	data["Movie"] = &movieData.movie
+	moviesData := MovieData{Movie{}, 0, []string{}}
+	data["Movie"] = &moviesData.Movie
 
 	// the frontend data of the movies, e.g. full title, release date and poster
 	movies := []Movie{}
@@ -51,27 +51,33 @@ func StartServer() {
 	e.POST("/search", func(c echo.Context) error {
 		data["HasMore"] = true
 
-		// possibilities
-		// - only have a small selection of movies
-		// - use TMBD API to search for the movies (might be difficult right now)
+		// use TMBD API to search for the movies
 		movie := c.FormValue("movie")
 
-		// Use the Scraper
-		moviesIds, err := Scraper(movie) // movie, maxusers, threads
+		// get movie data
+		movieData, err := LookUpMovie(movie)
 
 		if err != nil {
-			data["Error"] = "Movie not found"
+			data["Error"] = "Movie not found on TMDB"
 			return c.Render(200, "error.html", data)
 		}
 
-		movieData = MovieData{movie, 0, moviesIds}
+		// Use the Scraper to get the movie slugs
+		movieSlugs, err := Scraper(movie) // movie, maxusers, threads
+
+		if err != nil {
+			data["Error"] = "Movie not found on Letterboxd"
+			return c.Render(200, "error.html", data)
+		}
+
+		moviesData = MovieData{movieData, 0, movieSlugs}
 
 		// Use the LookUp to get the movie info
 		// this also overwrites the movie data
-		movies, _ = LookUpMovies(&movieData)
+		movies, _ = LookUpMovies(&moviesData)
 
 		// very rarely will be less than 10 movies
-		if (movieData).IsFull() {
+		if (moviesData).IsFull() {
 			data["HasMore"] = false
 		}
 
@@ -80,17 +86,17 @@ func StartServer() {
 
 	e.POST("/loadMore", func(c echo.Context) error {
 		// ensure we don't load movies if we don't have a movie loaded
-		if len(movieData.ids) == 0 {
+		if len(moviesData.slugs) == 0 {
 			data["Error"] = "No movies"
 			return c.Render(200, "error.html", data)
 		}
 
-		TMDBMovieInfo, _ := LookUpMovies(&movieData)
+		TMDBMovieInfo, _ := LookUpMovies(&moviesData)
 
 		movies = append(movies, TMDBMovieInfo...) // concatenate the slices
 
 		// will not show the load more button if there are no more movies
-		if (movieData).IsFull() {
+		if (moviesData).IsFull() {
 			data["HasMore"] = false
 		}
 
