@@ -10,6 +10,8 @@ type Movie struct {
 	Slug         string
 	Release_date string
 	Poster_path  string
+	Overview     string
+	Popularity   float64
 }
 
 type MovieData struct {

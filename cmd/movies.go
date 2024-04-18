@@ -1,36 +1,10 @@
 package main
 
 import (
-	"html/template"
-	"io"
-
 	"github.com/labstack/echo/v4"
 )
 
-type Template struct {
-	templates *template.Template
-}
-
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-func newTemplate() *Template {
-	return &Template{
-		templates: template.Must(template.ParseGlob("views/*.html")),
-	}
-}
-
-func StartServer() {
-	e := echo.New()
-
-	// e.Use(middleware.Logger())
-
-	e.Renderer = newTemplate()
-
-	e.Static("/images", "images")
-	e.Static("/css", "css")
-
+func movies(e *echo.Echo) {
 	data := map[string]interface{}{}
 
 	// essentially the "backend" data of the movies
@@ -44,30 +18,35 @@ func StartServer() {
 	// whether there are more movies to load
 	data["HasMore"] = true
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index", nil)
-	})
-
+	// what to run when the user searches for a movie
 	e.POST("/search", func(c echo.Context) error {
-		data["HasMore"] = true
-
 		// use TMBD API to search for the movies
 		movie := c.FormValue("movie")
+
+		data["Term"] = movie
+		data["Results"] = search(movie)
+
+		return c.Render(200, "search_results", data)
+	})
+
+	// when we have the movie with exact data, search for recommendations
+	e.POST("/recommend", func(c echo.Context) error {
+		movie := c.FormValue("movie")
+
+		data["HasMore"] = true
 
 		// get movie data
 		movieData, err := LookUpMovie(movie)
 
 		if err != nil {
-			data["Error"] = "Movie not found on TMDB"
-			return c.Render(200, "error.html", data)
+			return c.String(404, "Movie not found on TMDB")
 		}
 
 		// Use the Scraper to get the movie slugs
 		movieSlugs, err := Scraper(movie) // movie, maxusers, threads
 
 		if err != nil {
-			data["Error"] = "Movie not found on Letterboxd"
-			return c.Render(200, "error.html", data)
+			return c.String(404, "Movie not found on Letterboxd")
 		}
 
 		moviesData = MovieData{movieData, 0, movieSlugs}
@@ -75,6 +54,10 @@ func StartServer() {
 		// Use the LookUp to get the movie info
 		// this also overwrites the movie data
 		movies, _ = LookUpMovies(&moviesData)
+
+		if len(movies) == 0 {
+			return c.String(404, "Error when looking up movies")
+		}
 
 		// very rarely will be less than 10 movies
 		if (moviesData).IsFull() {
@@ -87,8 +70,7 @@ func StartServer() {
 	e.POST("/loadMore", func(c echo.Context) error {
 		// ensure we don't load movies if we don't have a movie loaded
 		if len(moviesData.slugs) == 0 {
-			data["Error"] = "No movies"
-			return c.Render(200, "error.html", data)
+			return c.String(404, "No movies")
 		}
 
 		TMDBMovieInfo, _ := LookUpMovies(&moviesData)
@@ -102,6 +84,4 @@ func StartServer() {
 
 		return c.Render(200, "recommendations.html", data)
 	})
-
-	e.Logger.Fatal(e.Start(":8080"))
 }

@@ -1,0 +1,54 @@
+{{ block "search_results" . }}
+<div
+  id="search-results"
+  name="search-resulsts"
+  class="mx-auto w-screen md:w-3/4 mt-8 flex flex-col gap-16 p-8 items-center"
+>
+  <h1 class="text-3xl">Search Results:</h1>
+
+  <div
+    class="flex flex-col bg-gray-800 border-2 border-gray-900 rounded-lg p-6 justify-center gap-6"
+    id="movies"
+  >
+    {{ range .Results }}
+    <div class="flex flex-col gap-10">
+      <div class="flex gap-2 items-start mt-4">
+        <div
+          class="hover:scale-105 transition ease-linear duration-75 min-w-48 max-h-72 max-w-48 border-2 border-transparent rounded-sm shadow-md hover:border-2 hover:border-solid hover:border-green-600 hover:cursor-pointer"
+        >
+          <a href="https://letterboxd.com/film/{{ .Slug }}" taget="_blank">
+            <img
+              src="https://image.tmdb.org/t/p/w500{{ .Poster_path }}"
+              class="border rounded-sm border-gray-600"
+              alt="Poster for {{ .Title }}"
+            />
+          </a>
+        </div>
+        <div class="flex flex-col p-2 gap-4 items-start">
+          <div class="flex gap-4 items-center">
+            <button
+              hx-post="/recommend"
+              hx-target="#search-results"
+              hx-swap="outerHTML"
+              name="movie"
+              value="{{ .Slug }}"
+            >
+              <p class="text-2xl font-bold hover:text-blue-500">
+                {{ .Title }}
+              </p>
+            </button>
+            <p class="font-extralight underline">{{ .Release_date }}</p>
+          </div>
+          <p class="text-left">{{ .Overview }}</p>
+          <p class="text-left text-xl">Directed By: <button class="font-semibold">TODO</button></p>
+        </div>
+      </div>
+      <div class="h-0.5 w-auto rounded-lg border opacity-25 border-gray-400">
+
+      </div>
+    </div>
+    {{end}}
+  <p class="text-center">End of List</p>
+  </div>
+</div>
+{{ end }}
