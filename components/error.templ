@@ -1,0 +1,10 @@
+package components
+
+import "fmt"
+
+templ ErrorPage(code int, message string) {
+	<div>
+		<h1 class="text-4xl">{ fmt.Sprintf("%d", code) } error</h1>
+		<p>{ message }</p>
+	</div>
+}

@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"encoding/json"
@@ -8,11 +8,13 @@ import (
 	"net/http"
 	"os"
 
+	"letterboxd-rec/utils"
+
 	"github.com/joho/godotenv"
 )
 
-func KeyedLookUpMovie(id int, key string) (Movie, error) {
-	movie := Movie{}
+func KeyedLookUpMovie(id int, key string) (utils.Movie, error) {
+	movie := utils.Movie{}
 
 	// endpoint
 	url := "https://api.themoviedb.org/3/movie/" + fmt.Sprint(id) + "?language=en-US"
@@ -39,7 +41,7 @@ func KeyedLookUpMovie(id int, key string) (Movie, error) {
 
 	// if it unmarshals correctly, return the movie, otherwise return an error
 	if movie.Id == 0 || movie.Title == "" || movie.Poster_path == "" || movie.Release_date == "" {
-		return movie, fmt.Errorf("Movie ID not found on TMDB")
+		return movie, fmt.Errorf("movie id not found on tmdb")
 	}
 
 	// get the year from the release date
@@ -48,7 +50,7 @@ func KeyedLookUpMovie(id int, key string) (Movie, error) {
 	return movie, nil
 }
 
-func LookUpMovie(movie string) (Movie, error) {
+func LookUpMovie(movie string) (utils.Movie, error) {
 	// load the .env file
 	err := godotenv.Load()
 
@@ -67,7 +69,7 @@ func LookUpMovie(movie string) (Movie, error) {
 	return movieData, err
 }
 
-func LookUpMovies(movieData *MovieData) ([]Movie, error) {
+func LookUpMovies(movieData *utils.MovieData) ([]utils.Movie, error) {
 	// load the .env file
 	err := godotenv.Load()
 
@@ -80,10 +82,10 @@ func LookUpMovies(movieData *MovieData) ([]Movie, error) {
 
 	key := os.Getenv("TMDB_API_KEY")
 
-	movies := []Movie{}
+	movies := []utils.Movie{}
 
 	// convert the slugs to TMDB ids
-	ids := convertToTMDBIds(movieData.slugs[movieData.pointer:movieData.Increment()])
+	ids := convertToTMDBIds(movieData.Slugs[movieData.Pointer:movieData.Increment()])
 
 	// look up each movie on TMDB
 	for _, id := range ids {

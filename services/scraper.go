@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"letterboxd-rec/utils"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
@@ -15,7 +17,7 @@ import (
 func randomise(fans int) map[int]bool {
 	maxFans := min(256, fans/25) // letterboxd seems to have a maximum of 256 pages
 
-	pages := max(1, MaxUsers/25)
+	pages := max(1, utils.MaxUsers/25)
 
 	// select targetPages randomly between 1 and pages (no duplicates)
 	randomPages := make(map[int]bool)
@@ -37,7 +39,7 @@ func scrapeUsers(movie string, fans int) []string {
 	users := []string{}
 
 	c.OnHTML("td.table-person", func(e *colly.HTMLElement) {
-		if len(users) >= MaxUsers {
+		if len(users) >= utils.MaxUsers {
 			return
 		}
 
@@ -48,7 +50,7 @@ func scrapeUsers(movie string, fans int) []string {
 	fmt.Println(pages)
 
 	q, _ := queue.New(
-		Threads,
+		utils.Threads,
 		&queue.InMemoryQueueStorage{MaxSize: len(pages) + 1},
 	)
 
@@ -68,8 +70,8 @@ func scrapeFavourites(users []string) map[string]int {
 
 	// create a queue with a worker pool of 2 threads
 	q, _ := queue.New(
-		Threads,
-		&queue.InMemoryQueueStorage{MaxSize: MaxUsers},
+		utils.Threads,
+		&queue.InMemoryQueueStorage{MaxSize: utils.MaxUsers},
 	)
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
@@ -97,7 +99,7 @@ func convertToTMDBIds(movieSlugs []string) []int {
 	c := colly.NewCollector()
 
 	q, _ := queue.New(
-		Threads,
+		utils.Threads,
 		&queue.InMemoryQueueStorage{MaxSize: len(movieSlugs)},
 	)
 
@@ -148,7 +150,7 @@ func Scraper(movie string) ([]string, error) {
 
 	// ensure the movie exists on letterboxd
 	if !exists {
-		return nil, fmt.Errorf("Movie not found on Letterboxd")
+		return nil, fmt.Errorf("movie not found on letterboxd")
 	}
 
 	// this users the movie's film slug, make sure you look up the correct one

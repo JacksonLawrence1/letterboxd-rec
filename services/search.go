@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"encoding/json"
@@ -7,8 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
+
+	"letterboxd-rec/utils"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/queue"
@@ -16,14 +19,14 @@ import (
 )
 
 type MovieSearchData struct {
-	Results []Movie
+	Results []utils.Movie
 }
 
-func findSlugs(movies *map[int]Movie) []Movie {
+func findSlugs(movies *map[int]utils.Movie) []utils.Movie {
 	c := colly.NewCollector()
 
 	q, _ := queue.New(
-		Threads,
+		utils.Threads,
 		&queue.InMemoryQueueStorage{MaxSize: len(*movies)},
 	)
 
@@ -59,7 +62,7 @@ func findSlugs(movies *map[int]Movie) []Movie {
 	q.Run(c)
 
 	// convert the map to a slice
-	movieSlice := make([]Movie, 0, len(*movies))
+	movieSlice := make([]utils.Movie, 0, len(*movies))
 
 	for _, movie := range *movies {
 		movieSlice = append(movieSlice, movie)
@@ -68,7 +71,7 @@ func findSlugs(movies *map[int]Movie) []Movie {
 	return movieSlice
 }
 
-func search(term string) []Movie {
+func Search(term string) []utils.Movie {
 	// load the .env file
 	err := godotenv.Load()
 
@@ -95,7 +98,7 @@ func search(term string) []Movie {
 	searchResults := MovieSearchData{}
 	json.Unmarshal(body, &searchResults)
 
-	movieMap := map[int]Movie{}
+	movieMap := map[int]utils.Movie{}
 
 	for _, movie := range searchResults.Results {
 		if movie.Popularity > 10 {
@@ -108,9 +111,9 @@ func search(term string) []Movie {
 	searchResults.Results = findSlugs(&movieMap)
 
 	// sort the movies by popularity
-	//sort.Slice(searchResults.Results, func(i, j int) bool {
-	//return searchResults.Results[i].Popularity > searchResults.Results[j].Popularity
-	//})
+	sort.Slice(searchResults.Results, func(i, j int) bool {
+		return searchResults.Results[i].Popularity > searchResults.Results[j].Popularity
+	})
 
 	return searchResults.Results
 }

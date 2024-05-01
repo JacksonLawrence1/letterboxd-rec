@@ -1,0 +1,7 @@
+package components
+
+templ Button(className string, attrs templ.Attributes) {
+    <button class={"inline-flex items-center justify-center rounded-md text-sm transition-colors border border-input h-10 px-4 py-2", className} { attrs... }>
+        { children... }
+    </button>
+}

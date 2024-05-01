@@ -1,8 +1,7 @@
-package main
+package utils
 
-var ItemsToShow int = 10
 var Threads int = 8
-var MaxUsers int = 100
+var MaxUsers int = 5
 
 type Movie struct {
 	Id           int
@@ -16,15 +15,17 @@ type Movie struct {
 
 type MovieData struct {
 	Movie   Movie
-	pointer int
-	slugs   []string
+	Pointer int
+	Slugs   []string
 }
 
+var ItemsToShow int = 10
+
 func (s *MovieData) Increment() int {
-	s.pointer = min(s.pointer+ItemsToShow, len(s.slugs)) // how many movies at a time
-	return s.pointer
+	s.Pointer = min(s.Pointer+ItemsToShow, len(s.Slugs)) // how many movies at a time
+	return s.Pointer
 }
 
 func (s *MovieData) IsFull() bool {
-	return s.pointer == len(s.slugs)
+	return s.Pointer == len(s.Slugs)
 }

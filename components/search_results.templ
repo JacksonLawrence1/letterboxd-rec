@@ -1,0 +1,31 @@
+package components
+
+import (
+	"letterboxd-rec/utils"
+)
+
+templ Results(movies []utils.Movie) {
+	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 rounded-lg p-6 gap-6">
+		for _, movie := range movies {
+			<div class="group relative overflow-hidden rounded-md">
+				<a href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank">
+					<img
+						src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
+						height="450"
+						width="300"
+						class="h-[450px] w-full object-cover transition-opacity group-hover:opacity-50"
+						alt={ string("Poster of " + movie.Title) }
+					/>
+				</a>
+				<div class="absolute inset-0 flex flex-col items-start justify-end gap-2 p-4 bg-gradient-to-t from-black to-transparent to-50%">
+					<h3 class="text-lg font-semibold text-white">{ movie.Title }</h3>
+					<p class="text-sm text-gray-300 underline underline-offset-2">{ movie.Release_date }</p>
+					@Button("bg-white border self-end", templ.Attributes{"hx-post": "/recommend", "hx-target": "#movies", "hx-swap": "outerHTML", "name": "movie", "value": movie.Slug}) {
+						Go
+					}
+				</div>
+			</div>
+		}
+	</div>
+	<p class="text-center">End of List</p>
+}
