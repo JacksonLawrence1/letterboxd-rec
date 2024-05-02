@@ -5,63 +5,68 @@ import (
 	"letterboxd-rec/services"
 	"letterboxd-rec/utils"
 	"net/http"
+	"strconv"
 )
+
+var searchResultsMap = map[int]*utils.Movie{}
 
 func SearchHandler(mux *http.ServeMux) {
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
-
-		// the movie the user is searching for
-		movie := r.FormValue("movie")
+		searchTerm := r.FormValue("movie")
 
 		// results of the search on TMDB
-		searchResults := services.Search(movie)
+		searchResults, err := services.Search(searchTerm)
 
+		if err != nil {
+			components.ErrorPage(404, err.Error()).Render(r.Context(), w)
+			return
+		}
+
+		// map the tmdb id to the movie so we can use it when recommending
+		for _, movie := range searchResults {
+			searchResultsMap[movie.Id] = &movie
+		}
+
+		// probably should filter results not found on letterboxd first
 		component := components.Results(searchResults)
 		component.Render(r.Context(), w)
 	})
 }
 
 func RecommendHandler(mux *http.ServeMux) {
-	moviesData := utils.MovieData{Movie: utils.Movie{}, Pointer: 0, Slugs: []string{}}
 	movies := []utils.Movie{}
+	movie := utils.Movie{}
 
 	mux.HandleFunc("POST /recommend", func(w http.ResponseWriter, r *http.Request) {
-		movieSlug := r.FormValue("movie")
+		tmdbId, err := strconv.Atoi(r.FormValue("tmdb-id"))
 
-		// get movie data
-		movieData, err := services.LookUpMovie(movieSlug)
+		if err != nil || searchResultsMap[tmdbId] == nil {
+			components.ErrorPage(404, "Error while searching, please try again.").Render(r.Context(), w)
+			return
+		}
+
+		movie = *searchResultsMap[tmdbId]
+
+		movies, err = services.Recommend(movie)
 
 		if err != nil {
-			components.ErrorPage(404, "Movie not found on TMDB").Render(r.Context(), w)
+			components.ErrorPage(404, err.Error()).Render(r.Context(), w)
+			return
 		}
 
-		// Use the Scraper to get the movie slugs
-		movieSlugs, err := services.Scraper(movieSlug) // movie, maxusers, threads
-
-		if err != nil {
-			components.ErrorPage(404, "Movie not found on Letterboxd").Render(r.Context(), w)
-		}
-
-		moviesData = utils.MovieData{Movie: movieData, Pointer: 0, Slugs: movieSlugs}
-
-		// Use the LookUp to get the movie info
-		// this also overwrites the movie data
-		movies, _ = services.LookUpMovies(&moviesData)
-
-		if len(movies) == 0 {
-			components.ErrorPage(404, "No movies found on Letterboxd").Render(r.Context(), w)
-		}
-
-		component := components.RecommendationPanel(&moviesData, movies)
-		component.Render(r.Context(), w)
+		recommendationPanel := components.RecommendationPanel(&movie, movies, len(movies) < utils.ItemsToShow)
+		recommendationPanel.Render(r.Context(), w)
 	})
 
 	mux.HandleFunc("POST /loadMore", func(w http.ResponseWriter, r *http.Request) {
-		TMDBMovieInfo, _ := services.LookUpMovies(&moviesData)
+		TMDBMovieInfo, isFull := services.GetMoreRecommendationsInfo()
 
-		// add the data to our existing movies
-		movies = append(movies, TMDBMovieInfo...)
-		components.Recommendations(movies, moviesData.IsFull()).Render(r.Context(), w)
+		if len(TMDBMovieInfo) > 0 {
+			movies = append(movies, TMDBMovieInfo...)
+		}
+
+		updatedRecommendations := components.Recommendations(movies, isFull)
+		updatedRecommendations.Render(r.Context(), w)
 	})
 }
