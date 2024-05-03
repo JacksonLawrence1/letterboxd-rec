@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"letterboxd-rec/components"
 	"letterboxd-rec/services"
+	"letterboxd-rec/templates/pages"
+	"letterboxd-rec/templates/partials"
 	"letterboxd-rec/utils"
 	"net/http"
 	"strconv"
@@ -19,7 +20,7 @@ func SearchHandler(mux *http.ServeMux) {
 		searchResults, err := services.Search(searchTerm)
 
 		if err != nil {
-			components.ErrorPage(404, err.Error()).Render(r.Context(), w)
+			pages.ErrorPage(502, err.Error()).Render(r.Context(), w)
 			return
 		}
 
@@ -29,7 +30,7 @@ func SearchHandler(mux *http.ServeMux) {
 		}
 
 		// probably should filter results not found on letterboxd first
-		component := components.Results(searchResults)
+		component := partials.Results(searchResults)
 		component.Render(r.Context(), w)
 	})
 }
@@ -42,31 +43,41 @@ func RecommendHandler(mux *http.ServeMux) {
 		tmdbId, err := strconv.Atoi(r.FormValue("tmdb-id"))
 
 		if err != nil || searchResultsMap[tmdbId] == nil {
-			components.ErrorPage(404, "Error while searching, please try again.").Render(r.Context(), w)
+			pages.ErrorPage(500, "Error while searching, please try again.").Render(r.Context(), w)
 			return
 		}
 
+		// Cache the selected movie
 		movie = *searchResultsMap[tmdbId]
 
+		// Get the recommendations for the selected movie
 		movies, err = services.Recommend(movie)
 
 		if err != nil {
-			components.ErrorPage(404, err.Error()).Render(r.Context(), w)
+			pages.ErrorPage(500, err.Error()).Render(r.Context(), w)
 			return
 		}
 
-		recommendationPanel := components.RecommendationPanel(&movie, movies, len(movies) < utils.ItemsToShow)
+		// Render recommendation panel
+		recommendationPanel := partials.RecommendationPanel(&movie, movies)
 		recommendationPanel.Render(r.Context(), w)
 	})
 
-	mux.HandleFunc("POST /loadMore", func(w http.ResponseWriter, r *http.Request) {
-		TMDBMovieInfo, isFull := services.GetMoreRecommendationsInfo()
+	mux.HandleFunc("GET /isFull", func(w http.ResponseWriter, r *http.Request) {
+		partials.LoadMore().Render(r.Context(), w)
+	})
 
-		if len(TMDBMovieInfo) > 0 {
-			movies = append(movies, TMDBMovieInfo...)
+	mux.HandleFunc("GET /loadMore", func(w http.ResponseWriter, r *http.Request) {
+		TMDBMovieInfo, isFull := services.GetMoreRecommendations()
+
+		if isFull {
+			w.Header().Set("HX-Trigger", "moreResults")
 		}
 
-		updatedRecommendations := components.Recommendations(movies, isFull)
-		updatedRecommendations.Render(r.Context(), w)
+		// Add the new recommendations
+		if len(TMDBMovieInfo) > 0 {
+			updatedRecommendations := partials.Recommendations(TMDBMovieInfo)
+			updatedRecommendations.Render(r.Context(), w)
+		}
 	})
 }

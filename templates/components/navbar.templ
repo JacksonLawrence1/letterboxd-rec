@@ -1,0 +1,19 @@
+package components
+
+templ NavBar() {
+	<header class="bg-background-dark h-[72px] flex items-center">
+		<div class="flex content-wrap justify-between mx-auto">
+			<nav class="flex items-center gap-4">
+				@Link(templ.Attributes{"hx-get": "/home", "hx-target": "#main"}, "") {
+					Home
+				}
+				@Link(templ.Attributes{"hx-get": "/about", "hx-target": "#main"}, "") {
+					About
+				}
+			</nav>
+			@Link(templ.Attributes{"href": "https://github.com/JacksonLawrence1/letterboxd-rec", "target": "_blank"}, "rounded-full hover:bg-gray-600") {
+				<img class="w-12 h-12 p-2" src="/assets/images/github-mark.svg" alt="GitHub Logo"/>
+			}
+		</div>
+	</header>
+}

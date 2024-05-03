@@ -45,13 +45,13 @@ func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 	movieData.Slugs = utils.SortByFrequency(movieData.Movie.Slug, movieFrequencyMap)
 
 	// first batch should not be full
-	batch, _ := GetMoreRecommendationsInfo()
+	batch, _ := GetMoreRecommendations()
 
 	// get the first batch of movies
 	return batch, nil
 }
 
-func GetMoreRecommendationsInfo() ([]utils.Movie, bool) {
+func GetMoreRecommendations() ([]utils.Movie, bool) {
 	// get the relevant ids by scraping the letterboxd page
 	tmdbIds := letterboxd.ConvertMovieSlugs(movieData.Slugs[movieData.Pointer:movieData.Increment()])
 

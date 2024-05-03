@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"letterboxd-rec/components"
+	"letterboxd-rec/templates/pages"
+	"letterboxd-rec/templates/partials"
 	"net/http"
 )
 
@@ -12,17 +13,17 @@ func New() *http.ServeMux {
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		index := components.Index()
+		index := pages.Index()
 		index.Render(r.Context(), w)
 	})
 
 	// Home
 	mux.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
-		components.Home().Render(r.Context(), w)
+		partials.SearchBar().Render(r.Context(), w)
 	})
 
 	mux.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
-		components.About().Render(r.Context(), w)
+		pages.About().Render(r.Context(), w)
 	})
 
 	// Search handler

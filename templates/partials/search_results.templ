@@ -1,32 +1,33 @@
-package components
+package partials
 
 import (
 	"fmt"
 	"letterboxd-rec/utils"
+	"letterboxd-rec/templates/components"
 )
 
 templ Results(movies []utils.Movie) {
-	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 rounded-lg p-6 gap-6">
+	<div class="grid grid-cols-4 gap-4">
 		for _, movie := range movies {
-			<div class="group relative overflow-hidden rounded-sm">
+			<div class="group relative overflow-hidden rounded-md">
 				<a href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank">
 					<img
 						src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
-						height="450"
-						width="300"
-						class="h-[450px] w-full object-cover transition-opacity group-hover:opacity-50"
+						class="w[230px] h-full object-cover transition-all group-hover:opacity-50"
 						alt={ string("Poster of " + movie.Title) }
 					/>
 				</a>
 				<div class="absolute inset-0 flex flex-col items-start justify-end gap-2 p-4 bg-gradient-to-t from-black to-transparent to-50%">
 					<h3 class="text-lg font-semibold text-white">{ movie.Title }</h3>
 					<p class="text-sm text-gray-300 underline underline-offset-2">{ movie.Release_date }</p>
-					<button hx-post="/recommend" hx-target="#movies" hx-swap="outerHTML" name="tmdb-id" value={ fmt.Sprintf("%d", movie.Id) } class="px-4 self-end">Go</button>
+					@components.Button(templ.Attributes{"hx-post": "/recommend", "hx-target": "#movies", "hx-swap": "outerHTML", "name": "tmdb-id", "value": fmt.Sprintf("%d", movie.Id)}, "self-end") {
+						Go
+					}
 				</div>
 			</div>
 		}
 	</div>
-	<div class="px-6 pt-4">
+	<div class="pt-4">
 	<p class="text-lg font-medium">Can't find a movie?</p>
 	<p class="text-sm">Make sure the movie you're looking for has enough members on Letterboxd, otherwise the system won't work!</p>
 	</div>

@@ -1,0 +1,7 @@
+package components
+
+templ Link(attrs templ.Attributes, class string) {
+	<a { attrs... } class={ "cursor-pointer font-medium hover:underline underline-offset-2", class }>
+		{ children... }
+	</a>
+}

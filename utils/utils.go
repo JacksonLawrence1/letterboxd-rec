@@ -8,7 +8,7 @@ import (
 )
 
 var Threads int = 8
-var MaxUsers int = 25
+var MaxUsers int = 10
 var ItemsToShow int = 10
 
 type Movie struct {

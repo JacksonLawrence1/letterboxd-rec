@@ -1,10 +1,12 @@
-package components
+package pages
 
 import "fmt"
 
 templ ErrorPage(code int, message string) {
 	<div id="movies" class="flex flex-col justify-center items-center gap-4">
-		<h1 class="text-4xl">{ fmt.Sprintf("%d", code) } error</h1>
+		if code != -1 {
+			<h1 class="text-4xl">{ fmt.Sprintf("%d", code) } error</h1>
+		}
 		<p>{ message }</p>
 	</div>
 }
