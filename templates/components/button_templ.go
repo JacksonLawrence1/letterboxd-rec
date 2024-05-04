@@ -23,7 +23,7 @@ func Button(attrs templ.Attributes, class string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{"inline-flex justify-center rounded-md text-white h-10 px-4 py-2 bg-primary-600 hover:bg-primary-700", class}
+		var templ_7745c5c3_Var2 = []any{"inline-flex justify-center items-center rounded-md text-sm text-white font-inter-semibold uppercase px-4 py-2 h-min bg-primary-600 hover:bg-primary-700", class}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

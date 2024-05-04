@@ -6,12 +6,7 @@ import (
 	"net/http"
 )
 
-func New() *http.ServeMux {
-	mux := http.NewServeMux()
-
-	// Serve static assets
-	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-
+func New(mux *http.ServeMux) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		index := pages.Index()
 		index.Render(r.Context(), w)
@@ -31,6 +26,4 @@ func New() *http.ServeMux {
 
 	// Recommend handler
 	RecommendHandler(mux)
-
-	return mux
 }

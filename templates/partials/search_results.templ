@@ -7,28 +7,38 @@ import (
 )
 
 templ Results(movies []utils.Movie) {
-	<div class="grid grid-cols-4 gap-4">
-		for _, movie := range movies {
-			<div class="group relative overflow-hidden rounded-md">
-				<a href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank">
-					<img
-						src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
-						class="w[230px] h-full object-cover transition-all group-hover:opacity-50"
-						alt={ string("Poster of " + movie.Title) }
-					/>
-				</a>
-				<div class="absolute inset-0 flex flex-col items-start justify-end gap-2 p-4 bg-gradient-to-t from-black to-transparent to-50%">
-					<h3 class="text-lg font-semibold text-white">{ movie.Title }</h3>
-					<p class="text-sm text-gray-300 underline underline-offset-2">{ movie.Release_date }</p>
-					@components.Button(templ.Attributes{"hx-post": "/recommend", "hx-target": "#movies", "hx-swap": "outerHTML", "name": "tmdb-id", "value": fmt.Sprintf("%d", movie.Id)}, "self-end") {
-						Go
-					}
-				</div>
-			</div>
-		}
+	<div class="htmx-indicator fade-in flex mb-4 gap-2 flex-col items-center justify-center" id="indicator">
+		<p>Searching for movies...</p>
+		<img id="spinner" src="/assets/images/spinner.svg" alt="Loading Indicator"/>
 	</div>
+	<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">Search Results</p>
+	if len(movies) == 0 {
+		<div class="flex flex-col items-center justify-center gap-4 py-8">
+			<p>No movies found!</p>
+		</div>
+	} else {
+		<div class="grid grid-cols-4 gap-4">
+			for _, movie := range movies {
+				<div class="group relative border-2 rounded-md border-opacity-0 hover:border-opacity-100 border-primary-500">
+					<a href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank">
+						<img
+							src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
+							class="w[230px] h-full object-cover transition-all group-hover:opacity-75"
+							alt={ string("Poster of " + movie.Title) }
+						/>
+					</a>
+					<div class="absolute inset-0 flex flex-col items-start justify-end p-4">
+						@components.Button(templ.Attributes{"hx-post": "/recommend", "hx-target": "#movies", "hx-swap": "outerHTML", "name": "tmdb-id", "value": fmt.Sprintf("%d", movie.Id)}, "self-end") {
+							Go
+						}
+					</div>
+					@components.Tooltip(fmt.Sprintf("%s (%s)", movie.Title, movie.Release_date))
+				</div>
+			}
+		</div>
+	}
 	<div class="pt-4">
-	<p class="text-lg font-medium">Can't find a movie?</p>
-	<p class="text-sm">Make sure the movie you're looking for has enough members on Letterboxd, otherwise the system won't work!</p>
+		<p class="text-sm uppercase w-full border-b border-background-light mb-2">Can't find a film?</p>
+		<p class="text-sm">Make sure the movie you're looking for has enough members on Letterboxd, otherwise the system won't work!</p>
 	</div>
 }

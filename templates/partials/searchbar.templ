@@ -5,18 +5,18 @@ import "letterboxd-rec/templates/components"
 templ SearchBar() {
 	<div class="flex flex-col mx-auto w-full gap-6">
 		<div class="flex items-center justify-between">
-			<h1 class="text-text-color text-2xl font-bold">Movie Search:</h1>
+			<h1 class="text-text-color text-2xl font-light">Movie Search:</h1>
 			@components.Button(nil, "") {
 				<div class="flex gap-3 items-center">
 					<img class="w-5 h-5" src="/assets/images/settings.svg" alt="Settings Icon"/>
-					Advanced Options
+					Options
 				</div>
 			}
 		</div>
 		<form class="flex items-center gap-4" id="movie-search" hx-post="/search" hx-target="#movies" hx-indicator="#indicator">
 			<div class="relative flex-1 items-center">
 				<img class="absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5" src="/assets/images/search.svg" alt="Search Icon"/>
-				<input class="flex w-full rounded-md border px-3 py-2 text-sm pl-9" type="text" name="movie" placeholder="Search for a movie..." required/>
+				<input class="flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double" type="text" name="movie" placeholder="Search for a movie..." required/>
 			</div>
 			@components.Button(templ.Attributes{"type": "submit"}, "") {
 				Search
@@ -24,7 +24,7 @@ templ SearchBar() {
 		</form>
 	</div>
 	<div id="movies">
-		<div class="htmx-indicator flex flex-col items-center justify-center gap-4" id="indicator">
+		<div class="htmx-indicator fade-in flex flex-col items-center justify-center gap-4" id="indicator">
 			<p>Searching for movies...</p>
 			<img id="spinner" src="/assets/images/spinner.svg" alt="Loading Indicator"/>
 		</div>

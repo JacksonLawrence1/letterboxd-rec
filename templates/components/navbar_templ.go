@@ -23,7 +23,7 @@ func NavBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-background-dark h-[72px] flex items-center\"><div class=\"flex content-wrap justify-between mx-auto\"><nav class=\"flex items-center gap-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-background-dark h-[72px] flex items-center\"><div class=\"flex content-wrap justify-between mx-auto\"><nav class=\"flex items-center gap-4 text-[1rem] uppercase font-inter-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

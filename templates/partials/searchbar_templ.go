@@ -25,7 +25,7 @@ func SearchBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col mx-auto w-full gap-6\"><div class=\"flex items-center justify-between\"><h1 class=\"text-text-color text-2xl font-bold\">Movie Search:</h1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col mx-auto w-full gap-6\"><div class=\"flex items-center justify-between\"><h1 class=\"text-text-color text-2xl font-light\">Movie Search:</h1>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -35,7 +35,7 @@ func SearchBar() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex gap-3 items-center\"><img class=\"w-5 h-5\" src=\"/assets/images/settings.svg\" alt=\"Settings Icon\"> Advanced Options\r</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex gap-3 items-center\"><img class=\"w-5 h-5\" src=\"/assets/images/settings.svg\" alt=\"Settings Icon\"> Options\r</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -48,7 +48,7 @@ func SearchBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md border px-3 py-2 text-sm pl-9\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -71,7 +71,7 @@ func SearchBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</form></div><div id=\"movies\"><div class=\"htmx-indicator flex flex-col items-center justify-center gap-4\" id=\"indicator\"><p>Searching for movies...</p><img id=\"spinner\" src=\"/assets/images/spinner.svg\" alt=\"Loading Indicator\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</form></div><div id=\"movies\"><div class=\"htmx-indicator fade-in flex flex-col items-center justify-center gap-4\" id=\"indicator\"><p>Searching for movies...</p><img id=\"spinner\" src=\"/assets/images/spinner.svg\" alt=\"Loading Indicator\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

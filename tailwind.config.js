@@ -5,11 +5,13 @@ module.exports = {
     colors: {
       background: "#2C343F",
       "background-dark": "#14171C",
-      "background-light": "#678",
-      seconday: "#F27405",
-      "text-color": "#abc",
-      "text-color-emph": "#FFFFFF",
-      "text-color-accent": "#9CA3AF",
+      "background-light": "#456",
+      "text-color": "#9ab",
+      "text-color-dark": "#234",
+      "text-color-emph": "#fff",
+      "text-color-accent": "#bcd",
+      "inp-color": "#567",
+      "border-color": "#89a",
       neutral: {
         50: "#f6f7f9",
         100: "#eceff2",
@@ -23,7 +25,7 @@ module.exports = {
         900: "#343c46",
         950: "#23282e",
       },
-      primary: {
+      'primary': {
         50: "#eefff0",
         100: "#d7ffde",
         200: "#b2ffbf",
