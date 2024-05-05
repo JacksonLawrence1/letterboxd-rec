@@ -1,0 +1,11 @@
+package partials
+
+import (
+	"letterboxd-rec/utils"
+)
+
+templ Homepage(trending []utils.Movie) {
+	@SearchBar() {
+		@Results("trending movies", trending)
+	}
+}

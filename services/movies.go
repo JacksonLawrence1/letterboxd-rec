@@ -27,11 +27,31 @@ func Search(term string) ([]utils.Movie, error) {
 	return filteredResults, nil
 }
 
+func GetTrending() ([]utils.Movie, error) {
+	// get trending movies
+	trendingMovies, err := tmdb.GetTrendingMovies()
+
+	if err != nil {
+		return trendingMovies, err
+	}
+
+	filteredResults := letterboxd.FilterLetterboxdMoviesByFans(trendingMovies, utils.MaxUsers)
+
+	if len(filteredResults) == 0 {
+		return filteredResults, fmt.Errorf("no trending movies found on letterboxd")
+	}
+
+	filteredResults = utils.SortByFans(filteredResults)
+
+	// only get the top 8 trending movies (or less if we don't have enough)
+	return filteredResults[:min(8, len(filteredResults))], nil
+}
+
 func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 	// Reset the movie data
 	movieData = utils.MovieData{Movie: movie, Pointer: 0, Slugs: []string{}}
 
-	// this users the movie's film slug, make sure you look up the correct one
+	// Scrapes the users who have the movie in their favourites
 	users := letterboxd.ScrapeUsers(&movieData.Movie)
 
 	// Scrapes each part of the user's profile to get their 4 favourites

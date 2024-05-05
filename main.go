@@ -10,12 +10,7 @@ import (
 // templ generate --watch --proxy="http://localhost:8080" --cmd="go run ."
 
 func main() {
-	mux := http.NewServeMux()
-
-	// Serve static assets
-	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
-
-	handlers.New(mux)
+	mux := handlers.New()
 
 	http.ListenAndServe(":8080", mux)
 }

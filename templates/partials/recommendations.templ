@@ -2,7 +2,6 @@ package partials
 
 import (
 	"letterboxd-rec/utils"
-	"letterboxd-rec/templates/components"
 )
 
 templ Recommendations(movies []utils.Movie) {
@@ -35,22 +34,20 @@ templ Recommendations(movies []utils.Movie) {
 }
 
 templ LoadMore() {
-	<p id="no-more-results" class="text-gray-500">No more results</p>
+	<p id="no-more-results" class="text-sm uppercase text-right border-t border-background-light w-full">No more results</p>
 }
 
 templ RecommendationPanel(movie *utils.Movie, movies []utils.Movie) {
-	<div class="flex flex-col gap-4" id="movies">
-		<h2 class="text-3xl font-bold tracking-tight">Movie Recommendations</h2>
-		<p class="text-gray-500">Based on the movie { movie.Title }, you might like:</p>
+	<div class="flex flex-col" id="movies">
+		<h2 class="text-2xl text-center font-inter-light pb-8 -mt-4">Based on <a class="text-white underline underline-offset-2">{ movie.Title }</a>, you might like:</h2>
+		<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">Recommendations</p>
 		<div id="recommendations">
-			<div class="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				@Recommendations(movies)
 			</div>
-			<div hx-get="/isFull" hx-trigger="moreResults from:body" class="flex items-center justify-center mt-4 py-4">
-				@components.Button(templ.Attributes{ "type": "button", "hx-get": "/loadMore", "hx-target": "#extra", "hx-swap": "outerHTML" }, "") {
-					Load More
-				}
-			</div>
+		</div>
+		<div hx-post="/isFull" hx-trigger="moreResults from:body" class="flex items-center justify-end pt-4 pb-8">
+			<a hx-post="/loadMore" hx-target="#extra" hx-swap="outerHTML" class="text-sm uppercase text-right border-t border-background-light w-full hover:text-white hover:underline cursor-pointer">Load More</a>
 		</div>
 	</div>
 }

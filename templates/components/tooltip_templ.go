@@ -23,7 +23,7 @@ func Tooltip(text string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"absolute hidden group-hover:block text-center bg-background-light text-text-color-accent font-semibold px-3 py-2 text-xs right-0 left-0 mx-auto w-fit bottom-full mb-4 rounded before:w-4 before:h-4 before:rotate-45 before:bg-background-light before:absolute before:z-[-1] before:top-full before:-mt-2 before:left-0 before:right-0 before:mx-auto\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"absolute hidden group-hover:block text-center bg-background-light text-text-color-accent font-semibold px-3 py-2 text-xs right-0 left-0 mx-auto w-fit bottom-full mb-3 rounded before:w-4 before:h-4 before:rotate-45 before:bg-background-light before:absolute before:z-[-1] before:top-full before:-mt-3 before:left-0 before:right-0 before:mx-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

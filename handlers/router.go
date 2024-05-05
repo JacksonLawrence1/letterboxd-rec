@@ -2,22 +2,19 @@ package handlers
 
 import (
 	"letterboxd-rec/templates/pages"
-	"letterboxd-rec/templates/partials"
 	"net/http"
 )
 
-func New(mux *http.ServeMux) {
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		index := pages.Index()
-		index.Render(r.Context(), w)
-	})
+func New() *http.ServeMux {
+	mux := http.NewServeMux()
 
-	// Home
-	mux.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
-		partials.SearchBar().Render(r.Context(), w)
-	})
+	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
-	mux.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+	// Index and Home route
+	HomeHandler(mux)
+
+	// About route
+	mux.HandleFunc("POST /about", func(w http.ResponseWriter, r *http.Request) {
 		pages.About().Render(r.Context(), w)
 	})
 
@@ -26,4 +23,6 @@ func New(mux *http.ServeMux) {
 
 	// Recommend handler
 	RecommendHandler(mux)
+
+	return mux
 }

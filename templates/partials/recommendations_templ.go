@@ -11,7 +11,6 @@ import "io"
 import "bytes"
 
 import (
-	"letterboxd-rec/templates/components"
 	"letterboxd-rec/utils"
 )
 
@@ -45,7 +44,7 @@ func Recommendations(movies []utils.Movie) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string("https://image.tmdb.org/t/p/w500" + movie.Poster_path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 14, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 13, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -58,7 +57,7 @@ func Recommendations(movies []utils.Movie) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string("Poster for " + movie.Title))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 18, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 17, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -71,7 +70,7 @@ func Recommendations(movies []utils.Movie) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(movie.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 22, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 21, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -84,7 +83,7 @@ func Recommendations(movies []utils.Movie) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(movie.Release_date)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 23, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 22, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -119,7 +118,7 @@ func LoadMore() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p id=\"no-more-results\" class=\"text-gray-500\">No more results</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p id=\"no-more-results\" class=\"text-sm uppercase text-right border-t border-background-light w-full\">No more results</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,20 +142,20 @@ func RecommendationPanel(movie *utils.Movie, movies []utils.Movie) templ.Compone
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4\" id=\"movies\"><h2 class=\"text-3xl font-bold tracking-tight\">Movie Recommendations</h2><p class=\"text-gray-500\">Based on the movie ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col\" id=\"movies\"><h2 class=\"text-2xl text-center font-inter-light pb-8 -mt-4\">Based on <a class=\"text-white underline underline-offset-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(movie.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 44, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\recommendations.templ`, Line: 42, Col: 136}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(", you might like:</p><div id=\"recommendations\"><div class=\"mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a>, you might like:</h2><p class=\"text-sm uppercase w-full border-b border-background-light -mt-4 mb-4\">Recommendations</p><div id=\"recommendations\"><div class=\"grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -164,30 +163,7 @@ func RecommendationPanel(movie *utils.Movie, movies []utils.Movie) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div hx-get=\"/isFull\" hx-trigger=\"moreResults from:body\" class=\"flex items-center justify-center mt-4 py-4\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var10 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
-			if !templ_7745c5c3_IsBuffer {
-				templ_7745c5c3_Buffer = templ.GetBuffer()
-				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("Load More\r")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if !templ_7745c5c3_IsBuffer {
-				_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
-			}
-			return templ_7745c5c3_Err
-		})
-		templ_7745c5c3_Err = components.Button(templ.Attributes{"type": "button", "hx-get": "/loadMore", "hx-target": "#extra", "hx-swap": "outerHTML"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div hx-post=\"/isFull\" hx-trigger=\"moreResults from:body\" class=\"flex items-center justify-end pt-4 pb-8\"><a hx-post=\"/loadMore\" hx-target=\"#extra\" hx-swap=\"outerHTML\" class=\"text-sm uppercase text-right border-t border-background-light w-full hover:text-white hover:underline cursor-pointer\">Load More</a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -25,7 +25,7 @@ func FilterLetterboxdMoviesByFans(movies []utils.Movie, maxUsers int) []utils.Mo
 		return filteredMovies
 	}
 
-	c, q := newScraper(utils.Threads, maxUsers)
+	c, q := newScraper(utils.Threads, len(movies))
 
 	// get the number of fans for each movie
 	c.OnHTML("li.js-route-fans", func(e *colly.HTMLElement) {
@@ -82,12 +82,7 @@ func FilterLetterboxdMovies(movies []utils.Movie) []utils.Movie {
 			movie := &movies[tmdbMap[id]]
 			movie.Slug = split[size-2] // 2nd to last part is the slug
 
-			// Required if missing release date or release date is TBD
-			if len(movie.Release_date) > 4 {
-				movie.Release_date = movie.Release_date[:4] // only get the year
-
-				foundMovies = append(foundMovies, *movie)
-			}
+			foundMovies = append(foundMovies, *movie)
 		}
 	})
 

@@ -3,11 +3,11 @@ package components
 templ NavBar() {
 	<header class="bg-background-dark h-[72px] flex items-center">
 		<div class="flex content-wrap justify-between mx-auto">
-			<nav class="flex items-center gap-4 text-[1rem] uppercase font-inter-semibold">
-				@Link(templ.Attributes{"hx-get": "/home", "hx-target": "#main"}, "") {
+			<nav class="flex items-center gap-4 text-[0.9rem] uppercase font-inter-bold">
+				@Link(templ.Attributes{"hx-post": "/home", "hx-target": "#main"}, "") {
 					Home
 				}
-				@Link(templ.Attributes{"hx-get": "/about", "hx-target": "#main"}, "") {
+				@Link(templ.Attributes{"hx-post": "/about", "hx-target": "#main"}, "") {
 					About
 				}
 			</nav>

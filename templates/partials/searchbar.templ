@@ -1,6 +1,12 @@
 package partials 
 
-import "letterboxd-rec/templates/components"
+import (
+	"letterboxd-rec/templates/components"
+)
+
+templ ValidationError(message string) {
+	<label id="validation" hx-swap-oob="true" class="text-red-500 text-sm -my-4">{ message }</label>
+}
 
 templ SearchBar() {
 	<div class="flex flex-col mx-auto w-full gap-6">
@@ -22,11 +28,13 @@ templ SearchBar() {
 				Search
 			}
 		</form>
+		<label id="validation" class="absolute"></label>
+	</div>
+	<div class="htmx-indicator fade-in flex flex-col items-center justify-center gap-4" id="indicator">
+		<p>Searching for movies...</p>
+		<img id="spinner" src="/assets/images/spinner.svg" alt="Loading Indicator"/>
 	</div>
 	<div id="movies">
-		<div class="htmx-indicator fade-in flex flex-col items-center justify-center gap-4" id="indicator">
-			<p>Searching for movies...</p>
-			<img id="spinner" src="/assets/images/spinner.svg" alt="Loading Indicator"/>
-		</div>
+		{ children... }
 	</div>
 }

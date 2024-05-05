@@ -3,9 +3,11 @@ package pages
 import (
 	"letterboxd-rec/templates/components"
 	"letterboxd-rec/templates/partials"
+
+	"letterboxd-rec/utils"
 )
 
-templ Index() {
+templ Index(trending []utils.Movie) {
 	<!DOCTYPE html>
 	<html lang="en" id="html">
 		<head>
@@ -21,9 +23,13 @@ templ Index() {
 			<div class="flex flex-col min-h-screen">
 				@components.NavBar()
 				<main id="main" class="flex flex-col content-wrap mx-auto gap-8 py-8">
-					@partials.SearchBar()
+					@partials.Homepage(trending)
 				</main>
 			</div>
 		</body>
 	</html>
+}
+
+templ IndexDefault() {
+	@Index([]utils.Movie{})	
 }

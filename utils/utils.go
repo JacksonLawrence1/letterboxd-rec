@@ -8,7 +8,7 @@ import (
 )
 
 var Threads int = 8
-var MaxUsers int = 10
+var MaxUsers int = 5
 var ItemsToShow int = 10
 
 type Movie struct {
@@ -52,6 +52,14 @@ func SortByFrequency(slug string, movies map[string]int) []string {
 	})
 
 	return keys
+}
+
+func SortByFans(movies []Movie) []Movie {
+	slices.SortFunc(movies, func(i Movie, j Movie) int {
+		return j.Fans - i.Fans
+	})
+
+	return movies
 }
 
 func FilterByPopularity(movies []Movie, popularity float64) []Movie {

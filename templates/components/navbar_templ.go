@@ -23,7 +23,7 @@ func NavBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-background-dark h-[72px] flex items-center\"><div class=\"flex content-wrap justify-between mx-auto\"><nav class=\"flex items-center gap-4 text-[1rem] uppercase font-inter-semibold\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-background-dark h-[72px] flex items-center\"><div class=\"flex content-wrap justify-between mx-auto\"><nav class=\"flex items-center gap-4 text-[0.9rem] uppercase font-inter-bold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,7 +42,7 @@ func NavBar() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = Link(templ.Attributes{"hx-get": "/home", "hx-target": "#main"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Link(templ.Attributes{"hx-post": "/home", "hx-target": "#main"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func NavBar() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = Link(templ.Attributes{"hx-get": "/about", "hx-target": "#main"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Link(templ.Attributes{"hx-post": "/about", "hx-target": "#main"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

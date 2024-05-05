@@ -11,6 +11,49 @@ import (
 
 var searchResultsMap = map[int]*utils.Movie{}
 
+func addToTrending(trendingMovies *[]utils.Movie) error {
+	if len(*trendingMovies) == 0 {
+		trending, err := services.GetTrending()
+
+		if err != nil {
+			return err
+		}
+
+		for _, movie := range trending {
+			searchResultsMap[movie.Id] = &movie
+			*trendingMovies = append(*trendingMovies, movie)
+		}
+	}
+	return nil
+}
+
+func HomeHandler(mux *http.ServeMux) {
+	// cache the trending movies
+	trendingMovies := []utils.Movie{}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		addToTrending(&trendingMovies)
+
+		pages.Index(trendingMovies).Render(r.Context(), w)
+	})
+
+	// Home
+	mux.HandleFunc("POST /home", func(w http.ResponseWriter, r *http.Request) {
+		err := addToTrending(&trendingMovies)
+
+		if err != nil {
+			pages.ErrorPage(500, "Error while fetching movies.").Render(r.Context(), w)
+			return
+		}
+
+		for _, movie := range trendingMovies {
+			searchResultsMap[movie.Id] = &movie
+		}
+
+		partials.Homepage(trendingMovies).Render(r.Context(), w)
+	})
+}
+
 func SearchHandler(mux *http.ServeMux) {
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
@@ -20,7 +63,8 @@ func SearchHandler(mux *http.ServeMux) {
 		searchResults, err := services.Search(searchTerm)
 
 		if err != nil {
-			pages.ErrorPage(502, err.Error()).Render(r.Context(), w)
+			w.Header().Set("HX-Retarget", "#validation")
+			partials.ValidationError("No Movies Found").Render(r.Context(), w)
 			return
 		}
 
@@ -30,7 +74,7 @@ func SearchHandler(mux *http.ServeMux) {
 		}
 
 		// probably should filter results not found on letterboxd first
-		component := partials.Results(searchResults)
+		component := partials.Results("search results", searchResults)
 		component.Render(r.Context(), w)
 	})
 }
@@ -63,11 +107,11 @@ func RecommendHandler(mux *http.ServeMux) {
 		recommendationPanel.Render(r.Context(), w)
 	})
 
-	mux.HandleFunc("GET /isFull", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /isFull", func(w http.ResponseWriter, r *http.Request) {
 		partials.LoadMore().Render(r.Context(), w)
 	})
 
-	mux.HandleFunc("GET /loadMore", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /loadMore", func(w http.ResponseWriter, r *http.Request) {
 		TMDBMovieInfo, isFull := services.GetMoreRecommendations()
 
 		if isFull {
