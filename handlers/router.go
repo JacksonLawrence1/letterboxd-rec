@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"letterboxd-rec/handlers/endpoints"
 	"letterboxd-rec/templates/pages"
 	"net/http"
 )
@@ -11,7 +12,7 @@ func New() *http.ServeMux {
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 
 	// Index and Home route
-	HomeHandler(mux)
+	endpoints.HomeHandler(mux)
 
 	// About route
 	mux.HandleFunc("POST /about", func(w http.ResponseWriter, r *http.Request) {
@@ -19,10 +20,10 @@ func New() *http.ServeMux {
 	})
 
 	// Search handler
-	SearchHandler(mux)
+	endpoints.SearchHandler(mux)
 
 	// Recommend handler
-	RecommendHandler(mux)
+	endpoints.RecommendHandler(mux)
 
 	return mux
 }

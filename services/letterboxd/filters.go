@@ -9,6 +9,46 @@ import (
 	"github.com/gocolly/colly"
 )
 
+// Given a list of movies, find only the ones that are available on letterboxd and append their slugs
+func FilterLetterboxdMovies(movies []utils.Movie) []utils.Movie {
+	c, q := newScraper(utils.Threads, len(movies))
+
+	// map tmdb id to index in the movies slice
+	tmdbMap := make(map[int]int)
+	foundMovies := make([]utils.Movie, 0)
+
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		split := strings.Split(e.Request.URL.String(), "/")
+		size := len(split)
+
+		// if the third to last part is "film", then it exists on letterboxd
+		if size > 2 && split[size-3] == "film" {
+			// on the page, get the tmdb id
+			id, err := strconv.Atoi(e.Attr("data-tmdb-id"))
+
+			if err != nil {
+				return
+			}
+
+			// get the movie from the slice
+			movie := &movies[tmdbMap[id]]
+			movie.Slug = split[size-2] // 2nd to last part is the slug
+
+			foundMovies = append(foundMovies, *movie)
+		}
+	})
+
+	for i, movie := range movies {
+		tmdbMap[movie.Id] = i
+
+		url := "https://letterboxd.com/tmdb/" + fmt.Sprint(movie.Id) + "/"
+		q.AddURL(url)
+	}
+
+	q.Run(c)
+	return foundMovies
+}
+
 // Find only the movies that have more than maxUsers fans on letterboxd
 func FilterLetterboxdMoviesByFans(movies []utils.Movie, maxUsers int) []utils.Movie {
 	// very unlikely a movie with low tmdb popularity has enough fans on letterboxd
@@ -55,44 +95,4 @@ func FilterLetterboxdMoviesByFans(movies []utils.Movie, maxUsers int) []utils.Mo
 	q.Run(c)
 
 	return filteredMovies
-}
-
-// Given a list of movies, find only the ones that are available on letterboxd and append their slugs
-func FilterLetterboxdMovies(movies []utils.Movie) []utils.Movie {
-	c, q := newScraper(utils.Threads, len(movies))
-
-	// map tmdb id to index in the movies slice
-	tmdbMap := make(map[int]int)
-	foundMovies := make([]utils.Movie, 0)
-
-	c.OnHTML("body", func(e *colly.HTMLElement) {
-		split := strings.Split(e.Request.URL.String(), "/")
-		size := len(split)
-
-		// if the third to last part is "film", then it exists on letterboxd
-		if size > 2 && split[size-3] == "film" {
-			// on the page, get the tmdb id
-			id, err := strconv.Atoi(e.Attr("data-tmdb-id"))
-
-			if err != nil {
-				return
-			}
-
-			// get the movie from the slice
-			movie := &movies[tmdbMap[id]]
-			movie.Slug = split[size-2] // 2nd to last part is the slug
-
-			foundMovies = append(foundMovies, *movie)
-		}
-	})
-
-	for i, movie := range movies {
-		tmdbMap[movie.Id] = i
-
-		url := "https://letterboxd.com/tmdb/" + fmt.Sprint(movie.Id) + "/"
-		q.AddURL(url)
-	}
-
-	q.Run(c)
-	return foundMovies
 }

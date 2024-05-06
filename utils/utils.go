@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"math/rand"
 	"slices"
 	"strconv"
@@ -8,8 +9,10 @@ import (
 )
 
 var Threads int = 8
-var MaxUsers int = 5
+var MaxUsers int = 100
 var ItemsToShow int = 10
+
+var Progress ProgressData = ProgressData{Percent: 0, Message: ""}
 
 type Movie struct {
 	Id           int
@@ -17,24 +20,42 @@ type Movie struct {
 	Slug         string
 	Release_date string
 	Poster_path  string
-	Overview     string
 	Popularity   float64
 	Fans         int
 }
 
-type MovieData struct {
+type RecommendationData struct {
 	Movie   Movie
 	Pointer int
 	Slugs   []string
 }
 
-func (s *MovieData) Increment() int {
+type ProgressData struct {
+	Percent int
+	Message string
+}
+
+func (s *RecommendationData) Increment() int {
 	s.Pointer = min(s.Pointer+ItemsToShow, len(s.Slugs)) // how many movies at a time
 	return s.Pointer
 }
 
-func (s *MovieData) IsFull() bool {
+func (s *RecommendationData) IsFull() bool {
 	return s.Pointer == len(s.Slugs)
+}
+
+func SerializeMovieData(movie Movie) string {
+	bytes, _ := json.Marshal(movie)
+	return string(bytes)
+}
+
+type movieTitle struct {
+	Title string
+}
+
+func SerializeTitle(title string) string {
+	bytes, _ := json.Marshal(movieTitle{Title: title})
+	return string(bytes)
 }
 
 func SortByFrequency(slug string, movies map[string]int) []string {

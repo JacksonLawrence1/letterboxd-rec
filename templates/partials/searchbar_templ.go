@@ -87,7 +87,7 @@ func SearchBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\" hx-disabled-elt=\"#search, button[name=&#39;tmdb-id&#39;]\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -106,7 +106,7 @@ func SearchBar() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = components.Button(templ.Attributes{"type": "submit"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.Button(templ.Attributes{"id": "search", "type": "submit"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

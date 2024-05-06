@@ -1,33 +1,37 @@
 package partials
 
 import (
+	"fmt"
 	"letterboxd-rec/utils"
+	"letterboxd-rec/templates/components"
 )
+
+templ ProgressBar(progress utils.ProgressData) {
+	<div class="flex flex-col w-96 mx-auto items-center justify-center" hx-get="/recommend/progress" hx-params="none" hx-trigger="every 500ms" hx-target="this" hx-swap="innerHTML">
+		<p class="text-3xl py-4">Loading Recommendations...</p>
+		<div class="w-full h-8 border-2 border-background-dark bg-gray-800 rounded-lg overflow-hidden">
+			<div class={ "h-full bg-green-500", fmt.Sprintf("w-[%d%%]", progress.Percent) }></div>
+		</div>
+		<p class="text-sm uppercase py-1">{ progress.Message }</p>
+	</div>
+}
+
+templ Loading(progress utils.ProgressData, movieTitle string) {
+	<div hx-trigger="done" hx-get="/recommendations" hx-target="#movies" hx-swap="innerHTML" hx-vals={ utils.SerializeTitle(movieTitle) }>
+		@ProgressBar(progress)
+	</div>
+}
 
 templ Recommendations(movies []utils.Movie) {
 	for _, movie := range movies {
-		<div class="rounded-lg p-4 shadow-lg bg-background-light">
-			<div class="flex items-start">
-				<a class="mr-4 flex-shrink-0" href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank">
-					<img
-						src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
-						width="100"
-						height="150"
-						class="rounded-sm object-cover border-2 hover:border-green-500 transition duration-200 ease-in-out"
-						alt={ string("Poster for " + movie.Title) }
-					/>
-				</a>
-				<div class="flex flex-col gap-2">
-					<h3 class="text-gray-500">{ movie.Title }</h3>
-					<p class="-mt-2 text-sm text-gray-400 underline underline-offset-2">{ movie.Release_date }</p>
-					<p class="text-sm text-gray-500">Directed by: $$TODO$$</p>
-					<ul class="flex gap-2">
-						<div class="rounded-lg bg-gray-600">
-							<li class="text-xs px-2 py-1 text-white">Test Genre</li>
-						</div>
-					</ul>
-				</div>
-			</div>
+		<div class="movie-data group block relative w-[230px] h-full">
+			<img
+				src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
+				class="rounded-md object-cover transition-all group-hover:opacity-75"
+				alt={ string("Poster of " + movie.Title) }
+			/>
+			<a class="rounded-md absolute block box-border h-full overflow-hidden hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear" href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank"></a>
+			@components.Tooltip(fmt.Sprintf("%s (%s)", movie.Title, movie.Release_date[:4]))
 		</div>
 	}
 	<div id="extra"></div>
@@ -37,17 +41,15 @@ templ LoadMore() {
 	<p id="no-more-results" class="text-sm uppercase text-right border-t border-background-light w-full">No more results</p>
 }
 
-templ RecommendationPanel(movie *utils.Movie, movies []utils.Movie) {
-	<div class="flex flex-col" id="movies">
-		<h2 class="text-2xl text-center font-inter-light pb-8 -mt-4">Based on <a class="text-white underline underline-offset-2">{ movie.Title }</a>, you might like:</h2>
-		<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">Recommendations</p>
-		<div id="recommendations">
-			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				@Recommendations(movies)
-			</div>
+templ RecommendationPanel(title string, movies []utils.Movie) {
+	<h2 class="text-2xl text-center font-inter-light pb-8 -mt-4">Based on <a class="text-white underline underline-offset-2">{ title }</a>, you might like:</h2>
+	<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">Recommendations</p>
+	<div id="recommendations">
+		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			@Recommendations(movies)
 		</div>
-		<div hx-post="/isFull" hx-trigger="moreResults from:body" class="flex items-center justify-end pt-4 pb-8">
-			<a hx-post="/loadMore" hx-target="#extra" hx-swap="outerHTML" class="text-sm uppercase text-right border-t border-background-light w-full hover:text-white hover:underline cursor-pointer">Load More</a>
-		</div>
+	</div>
+	<div hx-post="/isFull" hx-trigger="moreResults from:body" class="flex items-center justify-end pt-4 pb-8">
+		<a hx-post="/loadMore" hx-target="#extra" hx-swap="outerHTML" class="text-sm uppercase text-right border-t border-background-light w-full hover:text-white hover:underline cursor-pointer">Load More</a>
 	</div>
 }

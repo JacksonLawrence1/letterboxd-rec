@@ -1,5 +1,11 @@
 package pages
 
+import (
+	"letterboxd-rec/templates/components"
+)
+
 templ About() {
-	<p>Test</p>
+	@components.Button(templ.Attributes{"disabled": true}, "") {
+		Test
+	}
 }

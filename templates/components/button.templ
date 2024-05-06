@@ -1,7 +1,7 @@
 package components
 
 templ Button(attrs templ.Attributes, class string) {
-	<button class={ "inline-flex justify-center items-center rounded-md text-sm text-white font-inter-semibold uppercase px-4 py-2 h-min bg-primary-600 hover:bg-primary-700", class } { attrs... }>
+	<button class={ "inline-flex justify-center items-center rounded-md text-sm text-white font-inter-semibold uppercase px-4 py-2 h-min bg-primary-600 enabled:hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50", class } { attrs... }>
 		{ children... }
 	</button>
 }

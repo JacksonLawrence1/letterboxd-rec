@@ -7,7 +7,7 @@ import (
 	"letterboxd-rec/utils"
 )
 
-var movieData = utils.MovieData{}
+var movieData = utils.RecommendationData{}
 
 func Search(term string) ([]utils.Movie, error) {
 	// get movie data
@@ -49,10 +49,12 @@ func GetTrending() ([]utils.Movie, error) {
 
 func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 	// Reset the movie data
-	movieData = utils.MovieData{Movie: movie, Pointer: 0, Slugs: []string{}}
+	movieData = utils.RecommendationData{Movie: movie, Pointer: 0, Slugs: []string{}}
 
 	// Scrapes the users who have the movie in their favourites
 	users := letterboxd.ScrapeUsers(&movieData.Movie)
+
+	utils.Progress.Message = "Getting user favourites"
 
 	// Scrapes each part of the user's profile to get their 4 favourites
 	// This part takes the longest time as we need to scrape a new page for each user
@@ -61,6 +63,8 @@ func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 	if len(movieFrequencyMap) == 0 {
 		return []utils.Movie{}, fmt.Errorf("no movies found")
 	}
+
+	utils.Progress.Message = "finalising recommendations"
 
 	movieData.Slugs = utils.SortByFrequency(movieData.Movie.Slug, movieFrequencyMap)
 
@@ -72,20 +76,32 @@ func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 }
 
 func GetMoreRecommendations() ([]utils.Movie, bool) {
+	start := movieData.Pointer
+	end := min(movieData.Pointer+utils.ItemsToShow, len(movieData.Slugs))
+
 	// get the relevant ids by scraping the letterboxd page
-	tmdbIds := letterboxd.ConvertMovieSlugs(movieData.Slugs[movieData.Pointer:movieData.Increment()])
+	tmdbIds := letterboxd.ConvertMovieSlugs(movieData.Slugs[start:end])
 
 	movieBatch := []utils.Movie{}
 
 	// get the movie info from TMDB using the ids
-	for _, tmdbId := range tmdbIds {
-		movie, err := tmdb.GetMovieInfo(tmdbId)
+	for i, id := range tmdbIds {
+		// this means it wasn't found on letterboxd
+		if id == 0 {
+			continue
+		}
+
+		movie, err := tmdb.GetMovieInfo(id)
+		movie.Slug = movieData.Slugs[start+i]
 
 		// if there's an error, skip the movie
 		if err == nil {
 			movieBatch = append(movieBatch, movie)
 		}
 	}
+
+	// increment the pointer
+	movieData.Increment()
 
 	return movieBatch, movieData.IsFull()
 }

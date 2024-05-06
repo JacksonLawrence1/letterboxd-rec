@@ -8,6 +8,14 @@ import (
 )
 
 templ Index(trending []utils.Movie) {
+	@IndexDefault() {
+		@partials.SearchBar() {
+			@partials.Results("Trending Movies", trending)
+		}
+	}
+}
+
+templ IndexDefault() {
 	<!DOCTYPE html>
 	<html lang="en" id="html">
 		<head>
@@ -23,13 +31,9 @@ templ Index(trending []utils.Movie) {
 			<div class="flex flex-col min-h-screen">
 				@components.NavBar()
 				<main id="main" class="flex flex-col content-wrap mx-auto gap-8 py-8">
-					@partials.Homepage(trending)
+					{ children... }
 				</main>
 			</div>
 		</body>
 	</html>
-}
-
-templ IndexDefault() {
-	@Index([]utils.Movie{})	
 }

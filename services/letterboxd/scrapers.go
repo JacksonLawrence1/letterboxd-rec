@@ -3,6 +3,7 @@ package letterboxd
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"letterboxd-rec/utils"
 
@@ -26,6 +27,7 @@ func ScrapeUsers(movie *utils.Movie) []string {
 	c, q := newScraper(utils.Threads, utils.MaxUsers)
 
 	users := []string{}
+	progress := 0
 
 	c.OnHTML("td.table-person", func(e *colly.HTMLElement) {
 		if len(users) >= utils.MaxUsers {
@@ -33,6 +35,10 @@ func ScrapeUsers(movie *utils.Movie) []string {
 		}
 
 		users = append(users, e.ChildAttr("a", "href"))
+
+		// Update progress
+		progress++
+		utils.Progress.Percent = progress * 20 / utils.MaxUsers
 	})
 
 	pages := utils.RandomisePages(movie.Fans)
@@ -53,12 +59,17 @@ func ScrapeFavourites(users []string) map[string]int {
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
 	movies := make(map[string]int) // map movie's slug to number of users who like it
+	progress := 0
 
 	c.OnHTML("section#favourites", func(e *colly.HTMLElement) {
 		// add the 4 favourites to the map
 		e.ForEach("div.poster", func(_ int, e *colly.HTMLElement) {
 			movies[e.Attr("data-film-slug")]++
 		})
+
+		// Update progress
+		progress++
+		utils.Progress.Percent = 20 + (progress * 70 / len(users))
 	})
 
 	// ideally, we want to only store the ids, then fetch all info we need from TMDB
@@ -76,20 +87,26 @@ func ScrapeFavourites(users []string) map[string]int {
 func ConvertMovieSlugs(movieSlugs []string) []int {
 	c, q := newScraper(utils.Threads, len(movieSlugs))
 
-	TMDBIds := []int{}
+	TMDBIds := make([]int, len(movieSlugs))
+	orderMap := make(map[string]int)
 
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		// get the TMDB id from the data attribute
 		id, err := strconv.Atoi(e.Attr("data-tmdb-id"))
+		split := strings.Split(e.Request.URL.String(), "/")
 
 		if err == nil && id != 0 {
-			TMDBIds = append(TMDBIds, id)
+			slug := split[len(split)-2]
+
+			// this maintains the correct order of the movies
+			TMDBIds[orderMap[slug]] = id
 		}
 	})
 
 	// scrape the TMDB id from the movie's letterboxd page
-	for _, id := range movieSlugs {
-		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/", id))
+	for i, slug := range movieSlugs {
+		orderMap[slug] = i
+		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/", slug))
 	}
 
 	q.Run(c)
