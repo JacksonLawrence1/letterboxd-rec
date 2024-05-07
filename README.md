@@ -53,11 +53,6 @@ TMDB_API_KEY="Your TMDB Access Token Auth"
 API_KEY="Your TMDB API Key Auth"
 ```
 
-## Contact
-
-Jackson Lawrence - jplqqz@gmail.com
-
-
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
