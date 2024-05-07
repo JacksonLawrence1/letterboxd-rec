@@ -2,8 +2,6 @@ package letterboxd
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"letterboxd-rec/utils"
 
@@ -11,7 +9,7 @@ import (
 	"github.com/gocolly/colly/queue"
 )
 
-func newScraper(threads int, maxSize int) (*colly.Collector, *queue.Queue) {
+func newScraper(maxSize int, threads int) (*colly.Collector, *queue.Queue) {
 	c := colly.NewCollector()
 
 	q, _ := queue.New(
@@ -23,14 +21,14 @@ func newScraper(threads int, maxSize int) (*colly.Collector, *queue.Queue) {
 }
 
 // gets the usernames of user's who have this movie in their top 4
-func ScrapeUsers(movie *utils.Movie) []string {
-	c, q := newScraper(utils.Threads, utils.MaxUsers)
+func ScrapeUsers(movie *utils.Movie, maxUsers int, threads int) []string {
+	c, q := newScraper(maxUsers, threads)
 
 	users := []string{}
 	progress := 0
 
 	c.OnHTML("td.table-person", func(e *colly.HTMLElement) {
-		if len(users) >= utils.MaxUsers {
+		if len(users) >= maxUsers {
 			return
 		}
 
@@ -38,10 +36,10 @@ func ScrapeUsers(movie *utils.Movie) []string {
 
 		// Update progress
 		progress++
-		utils.Progress.Percent = progress * 20 / utils.MaxUsers
+		utils.Progress.Percent = progress * 20 / maxUsers
 	})
 
-	pages := utils.RandomisePages(movie.Fans)
+	pages := utils.RandomisePages(movie.Fans, maxUsers)
 
 	// gets random pages based on the total number of users
 	for key := range pages {
@@ -54,8 +52,9 @@ func ScrapeUsers(movie *utils.Movie) []string {
 }
 
 // for each user, add their 4 favourites to a map
-func ScrapeFavourites(users []string) map[string]int {
-	c, q := newScraper(utils.Threads, len(users))
+func ScrapeFavourites(users []string, threads int) map[string]int {
+	size := len(users)
+	c, q := newScraper(size, threads)
 
 	// now we have the users, go onto their pages and scrape their 4 favourites (excluding the movie we're searching for)
 	movies := make(map[string]int) // map movie's slug to number of users who like it
@@ -64,12 +63,15 @@ func ScrapeFavourites(users []string) map[string]int {
 	c.OnHTML("section#favourites", func(e *colly.HTMLElement) {
 		// add the 4 favourites to the map
 		e.ForEach("div.poster", func(_ int, e *colly.HTMLElement) {
-			movies[e.Attr("data-film-slug")]++
+			// check if e.Attr("data-film-slug") exists on the page
+			if e.Attr("data-film-slug") != "" {
+				movies[e.Attr("data-film-slug")]++
+			}
 		})
 
 		// Update progress
 		progress++
-		utils.Progress.Percent = 20 + (progress * 70 / len(users))
+		utils.Progress.Percent = 20 + (progress * 70 / size)
 	})
 
 	// ideally, we want to only store the ids, then fetch all info we need from TMDB
@@ -81,35 +83,4 @@ func ScrapeFavourites(users []string) map[string]int {
 	q.Run(c)
 
 	return movies
-}
-
-// converts the movie slugs to TMDB ids so we can get the movie info from TMDB
-func ConvertMovieSlugs(movieSlugs []string) []int {
-	c, q := newScraper(utils.Threads, len(movieSlugs))
-
-	TMDBIds := make([]int, len(movieSlugs))
-	orderMap := make(map[string]int)
-
-	c.OnHTML("body", func(e *colly.HTMLElement) {
-		// get the TMDB id from the data attribute
-		id, err := strconv.Atoi(e.Attr("data-tmdb-id"))
-		split := strings.Split(e.Request.URL.String(), "/")
-
-		if err == nil && id != 0 {
-			slug := split[len(split)-2]
-
-			// this maintains the correct order of the movies
-			TMDBIds[orderMap[slug]] = id
-		}
-	})
-
-	// scrape the TMDB id from the movie's letterboxd page
-	for i, slug := range movieSlugs {
-		orderMap[slug] = i
-		q.AddURL(fmt.Sprintf("https://letterboxd.com/film/%s/", slug))
-	}
-
-	q.Run(c)
-
-	return TMDBIds
 }

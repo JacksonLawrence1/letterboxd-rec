@@ -12,19 +12,16 @@ templ SearchBar() {
 	<div class="flex flex-col mx-auto w-full gap-6">
 		<div class="flex items-center justify-between">
 			<h1 class="text-text-color text-2xl font-light">Movie Search:</h1>
-			@components.Button(nil, "") {
-				<div class="flex gap-3 items-center">
-					<img class="w-5 h-5" src="/assets/images/settings.svg" alt="Settings Icon"/>
-					Options
-				</div>
-			}
+			<div class="relative">
+				@components.CloseDropdown()
+			</div>
 		</div>
-		<form class="flex items-center gap-4" id="movie-search" hx-post="/search" hx-target="#movies" hx-indicator="#indicator" hx-disabled-elt="#search, button[name='tmdb-id']">
+		<form class="flex items-center gap-4" id="movie-search" hx-post="/search" hx-target="#movies" hx-indicator="#indicator" hx-disabled-elt="#search-button, #options, .search-result">
 			<div class="relative flex-1 items-center">
 				<img class="absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5" src="/assets/images/search.svg" alt="Search Icon"/>
 				<input class="flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double" type="text" name="movie" placeholder="Search for a movie..." required/>
 			</div>
-			@components.Button(templ.Attributes{"id": "search", "type": "submit"}, "") {
+			@components.Button(templ.Attributes{"id": "search-button", "type": "submit"}, "") {
 				Search
 			}
 		</form>

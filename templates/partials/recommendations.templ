@@ -7,9 +7,9 @@ import (
 )
 
 templ ProgressBar(progress utils.ProgressData) {
-	<div class="flex flex-col w-96 mx-auto items-center justify-center" hx-get="/recommend/progress" hx-params="none" hx-trigger="every 500ms" hx-target="this" hx-swap="innerHTML">
+	<div class="flex flex-col w-96 mx-auto items-center justify-center" hx-get="/recommend/progress" hx-trigger="every 500ms" hx-target="this" hx-swap="innerHTML">
 		<p class="text-3xl py-4">Loading Recommendations...</p>
-		<div class="w-full h-8 border-2 border-background-dark bg-gray-800 rounded-lg overflow-hidden">
+		<div class="w-full h-8 border-2 border-background-dark bg-gray-800 rounded-lg overflow-hidden shadow-lg">
 			<div class={ "h-full bg-green-500", fmt.Sprintf("w-[%d%%]", progress.Percent) }></div>
 		</div>
 		<p class="text-sm uppercase py-1">{ progress.Message }</p>
@@ -17,39 +17,66 @@ templ ProgressBar(progress utils.ProgressData) {
 }
 
 templ Loading(progress utils.ProgressData, movieTitle string) {
+	@components.Button(templ.Attributes{"disabled": "true", "hx-swap-oob": "outerHTML", "id": "search-button", "type": "submit"}, "") {
+		Search
+	}
 	<div hx-trigger="done" hx-get="/recommendations" hx-target="#movies" hx-swap="innerHTML" hx-vals={ utils.SerializeTitle(movieTitle) }>
 		@ProgressBar(progress)
 	</div>
 }
 
-templ Recommendations(movies []utils.Movie) {
+templ loadMoreButton(pointer int, isFull bool, more bool) {
+	<div
+		class="py-3"
+		id="load-more"
+		if more {
+			hx-swap-oob="true"
+		}
+	>
+		if isFull {
+			<p class="text-sm uppercase text-right border-t border-background-light w-full">No more results</p>
+		} else {
+			<button
+				name="load-more"
+				value={ fmt.Sprintf("%d", pointer) }
+				hx-post="/loadMore"
+				hx-target="#extra"
+				hx-swap="outerHTML"
+				hx-disabled-elt="this"
+				class="text-sm uppercase text-right border-t border-background-light w-full disabled:text-gray-700 disabled:cursor-not-allowed enabled:hover:text-white enabled:hover:underline enabled:cursor-pointer"
+			>Load More</button>
+		}
+	</div>
+}
+
+templ Recommendations(movies []utils.Movie, pointer int, isFull bool) {
+	// Replace search bar so its usable again
+	@components.Button(templ.Attributes{"hx-swap-oob": "outerHTML", "id": "search-button", "type": "submit"}, "") {
+		Search
+	}
 	for _, movie := range movies {
-		<div class="movie-data group block relative w-[230px] h-full">
+		<div class="movie-data group block relative h-[345px] w-full">
 			<img
 				src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
-				class="rounded-md object-cover transition-all group-hover:opacity-75"
-				alt={ string("Poster of " + movie.Title) }
+				class="aspect-[3/2] h-full rounded-md object-cover text-center bg-background-light transition-all group-hover:opacity-75 self-center"
+				alt={ movie.Title }
 			/>
 			<a class="rounded-md absolute block box-border h-full overflow-hidden hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear" href={ templ.URL("https://letterboxd.com/film/" + movie.Slug) } target="_blank"></a>
 			@components.Tooltip(fmt.Sprintf("%s (%s)", movie.Title, movie.Release_date[:4]))
 		</div>
 	}
-	<div id="extra"></div>
+	<div id="extra" class="absolute"></div>
+	// conditional + oob swapping for load more button
+	@loadMoreButton(pointer, isFull, true)
 }
 
-templ LoadMore() {
-	<p id="no-more-results" class="text-sm uppercase text-right border-t border-background-light w-full">No more results</p>
-}
-
-templ RecommendationPanel(title string, movies []utils.Movie) {
+templ RecommendationPanel(title string, movies []utils.Movie, pointer int, isFull bool) {
 	<h2 class="text-2xl text-center font-inter-light pb-8 -mt-4">Based on <a class="text-white underline underline-offset-2">{ title }</a>, you might like:</h2>
 	<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">Recommendations</p>
 	<div id="recommendations">
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			@Recommendations(movies)
+		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			@Recommendations(movies, pointer, isFull)
 		</div>
 	</div>
-	<div hx-post="/isFull" hx-trigger="moreResults from:body" class="flex items-center justify-end pt-4 pb-8">
-		<a hx-post="/loadMore" hx-target="#extra" hx-swap="outerHTML" class="text-sm uppercase text-right border-t border-background-light w-full hover:text-white hover:underline cursor-pointer">Load More</a>
-	</div>
+	@loadMoreButton(pointer, isFull, false)
 }

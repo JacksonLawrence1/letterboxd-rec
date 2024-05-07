@@ -64,34 +64,19 @@ func SearchBar() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col mx-auto w-full gap-6\"><div class=\"flex items-center justify-between\"><h1 class=\"text-text-color text-2xl font-light\">Movie Search:</h1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col mx-auto w-full gap-6\"><div class=\"flex items-center justify-between\"><h1 class=\"text-text-color text-2xl font-light\">Movie Search:</h1><div class=\"relative\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.CloseDropdown().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\" hx-disabled-elt=\"#search-button, #options, .search-result\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Var4 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
-			if !templ_7745c5c3_IsBuffer {
-				templ_7745c5c3_Buffer = templ.GetBuffer()
-				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex gap-3 items-center\"><img class=\"w-5 h-5\" src=\"/assets/images/settings.svg\" alt=\"Settings Icon\"> Options\r</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if !templ_7745c5c3_IsBuffer {
-				_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
-			}
-			return templ_7745c5c3_Err
-		})
-		templ_7745c5c3_Err = components.Button(nil, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"flex items-center gap-4\" id=\"movie-search\" hx-post=\"/search\" hx-target=\"#movies\" hx-indicator=\"#indicator\" hx-disabled-elt=\"#search, button[name=&#39;tmdb-id&#39;]\"><div class=\"relative flex-1 items-center\"><img class=\"absolute top-1/2 left-2 transform -translate-y-1/2 w-5 h-5\" src=\"/assets/images/search.svg\" alt=\"Search Icon\"> <input class=\"flex w-full rounded-md bg-inp-color border-b border-border-color px-3 py-2 pl-9 focus:bg-white focus:text-color-dark focus-visible:outline-border-color focus-visible:outline-double\" type=\"text\" name=\"movie\" placeholder=\"Search for a movie...\" required></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var5 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
@@ -106,7 +91,7 @@ func SearchBar() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = components.Button(templ.Attributes{"id": "search", "type": "submit"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.Button(templ.Attributes{"id": "search-button", "type": "submit"}, "").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

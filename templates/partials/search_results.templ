@@ -7,7 +7,6 @@ import (
 	"letterboxd-rec/templates/components"
 )
 
-
 templ Results(title string, movies []utils.Movie) {
 	if title == "search results" {
 		<label id="validation" hx-swap-oob="true" class="absolute"></label>
@@ -15,13 +14,13 @@ templ Results(title string, movies []utils.Movie) {
 	<p class="text-sm uppercase w-full border-b border-background-light -mt-4 mb-4">{ title }</p>
 	<div class="grid grid-cols-4 gap-4">
 		for _, movie := range movies {
-			<div method="POST" class="movie-data group block relative w-[230px] h-full">
+			<div method="POST" class="group movie-data block relative w-full h-[345px]">
+				<button hx-post="/recommend" hx-target="#movies" hx-disabled-elt="#search-button, #options" hx-vals={ utils.SerializeMovieData(movie) } class="search-result peer rounded-md absolute size-full overflow-hidden disabled:cursor-not-allowed enabled:group-hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear z-[1]"></button>
 				<img
 					src={ string("https://image.tmdb.org/t/p/w500" + movie.Poster_path) }
-					class="h-full rounded-md object-cover transition-all group-hover:opacity-75 self-center"
+					class="h-full aspect-[3/2] rounded-md object-cover peer-disabled:opacity-50 group-hover:opacity-75 self-center"
 					alt={ string("Poster of " + movie.Title) }
 				/>
-				<a hx-post="/recommend" hx-target="#movies" hx-vals={ utils.SerializeMovieData(movie) } class="rounded-md absolute block box-border h-full overflow-hidden hover:cursor-pointer hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear"></a>
 				@components.Tooltip(fmt.Sprintf("%s (%s)", movie.Title, movie.Release_date[:4]))
 			</div>
 		}

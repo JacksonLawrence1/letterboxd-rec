@@ -49,3 +49,26 @@
   margin: 0 auto;
   width: 950px;
 }
+
+#dropdown.htmx-settling {
+  display: absolute;
+  overflow: hidden;
+  transform-origin: top right;
+  right: 0;
+  height: 0;
+  width: 0;
+}
+
+#dropdown.htmx-swapping {
+  overflow: hidden;
+  height: 0;
+  transform-origin: top right;
+  transition: height 500ms ease-out;
+}
+
+.dropdown {
+  overflow: hidden;
+  height: 250px;
+  transform-origin: top right;
+  transition: height 500ms ease-in;
+}

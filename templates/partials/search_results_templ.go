@@ -43,7 +43,7 @@ func Results(title string, movies []utils.Movie) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 15, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 14, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,46 +54,46 @@ func Results(title string, movies []utils.Movie) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, movie := range movies {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div method=\"POST\" class=\"movie-data group block relative w-[230px] h-full\"><img src=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div method=\"POST\" class=\"group movie-data block relative w-full h-[345px]\"><button hx-post=\"/recommend\" hx-target=\"#movies\" hx-disabled-elt=\"#search-button, #options\" hx-vals=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string("https://image.tmdb.org/t/p/w500" + movie.Poster_path))
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(utils.SerializeMovieData(movie))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 20, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 18, Col: 137}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"h-full rounded-md object-cover transition-all group-hover:opacity-75 self-center\" alt=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"search-result peer rounded-md absolute size-full overflow-hidden disabled:cursor-not-allowed enabled:group-hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear z-[1]\"></button> <img src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string("Poster of " + movie.Title))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string("https://image.tmdb.org/t/p/w500" + movie.Poster_path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 22, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 20, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <a hx-post=\"/recommend\" hx-target=\"#movies\" hx-vals=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"h-full aspect-[3/2] rounded-md object-cover peer-disabled:opacity-50 group-hover:opacity-75 self-center\" alt=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(utils.SerializeMovieData(movie))
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string("Poster of " + movie.Title))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 24, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates\partials\search_results.templ`, Line: 22, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"rounded-md absolute block box-border h-full overflow-hidden hover:cursor-pointer hover:border-4 border-primary-500 top-0 inset-x-0 transition-all duration-100 ease-linear\"></a>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

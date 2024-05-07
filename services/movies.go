@@ -18,7 +18,7 @@ func Search(term string) ([]utils.Movie, error) {
 	}
 
 	// don't show movies that don't have enough fans on letterboxd
-	filteredResults := letterboxd.FilterLetterboxdMoviesByFans(searchResults, utils.MaxUsers)
+	filteredResults := letterboxd.FilterLetterboxdMoviesByFans(searchResults, utils.MaxUsers, utils.Threads)
 
 	if len(filteredResults) == 0 {
 		return filteredResults, fmt.Errorf("no results found on letterboxd")
@@ -35,7 +35,7 @@ func GetTrending() ([]utils.Movie, error) {
 		return trendingMovies, err
 	}
 
-	filteredResults := letterboxd.FilterLetterboxdMoviesByFans(trendingMovies, utils.MaxUsers)
+	filteredResults := letterboxd.FilterLetterboxdMoviesByFans(trendingMovies, utils.MaxUsers, utils.Threads)
 
 	if len(filteredResults) == 0 {
 		return filteredResults, fmt.Errorf("no trending movies found on letterboxd")
@@ -44,24 +44,24 @@ func GetTrending() ([]utils.Movie, error) {
 	filteredResults = utils.SortByFans(filteredResults)
 
 	// only get the top 8 trending movies (or less if we don't have enough)
-	return filteredResults[:min(8, len(filteredResults))], nil
+	return filteredResults[:min(4, len(filteredResults))], nil
 }
 
-func Recommend(movie utils.Movie) ([]utils.Movie, error) {
+func Recommend(movie utils.Movie, maxUsers int, threads int) ([]utils.Movie, bool, error) {
 	// Reset the movie data
-	movieData = utils.RecommendationData{Movie: movie, Pointer: 0, Slugs: []string{}}
+	movieData = utils.RecommendationData{Movie: movie, Slugs: []string{}}
 
 	// Scrapes the users who have the movie in their favourites
-	users := letterboxd.ScrapeUsers(&movieData.Movie)
+	users := letterboxd.ScrapeUsers(&movieData.Movie, maxUsers, threads)
 
 	utils.Progress.Message = "Getting user favourites"
 
 	// Scrapes each part of the user's profile to get their 4 favourites
 	// This part takes the longest time as we need to scrape a new page for each user
-	movieFrequencyMap := letterboxd.ScrapeFavourites(users)
+	movieFrequencyMap := letterboxd.ScrapeFavourites(users, threads)
 
 	if len(movieFrequencyMap) == 0 {
-		return []utils.Movie{}, fmt.Errorf("no movies found")
+		return []utils.Movie{}, true, fmt.Errorf("no movies found")
 	}
 
 	utils.Progress.Message = "finalising recommendations"
@@ -69,18 +69,17 @@ func Recommend(movie utils.Movie) ([]utils.Movie, error) {
 	movieData.Slugs = utils.SortByFrequency(movieData.Movie.Slug, movieFrequencyMap)
 
 	// first batch should not be full
-	batch, _ := GetMoreRecommendations()
+	batch, _, isFull := GetMoreRecommendations(0, threads)
 
 	// get the first batch of movies
-	return batch, nil
+	return batch, isFull, nil
 }
 
-func GetMoreRecommendations() ([]utils.Movie, bool) {
-	start := movieData.Pointer
-	end := min(movieData.Pointer+utils.ItemsToShow, len(movieData.Slugs))
+func GetMoreRecommendations(start int, threads int) ([]utils.Movie, int, bool) {
+	end := min(start+utils.ItemsToShow, len(movieData.Slugs))
 
 	// get the relevant ids by scraping the letterboxd page
-	tmdbIds := letterboxd.ConvertMovieSlugs(movieData.Slugs[start:end])
+	tmdbIds := letterboxd.ConvertSlugToTMDBId(movieData.Slugs[start:end], utils.Threads)
 
 	movieBatch := []utils.Movie{}
 
@@ -100,8 +99,5 @@ func GetMoreRecommendations() ([]utils.Movie, bool) {
 		}
 	}
 
-	// increment the pointer
-	movieData.Increment()
-
-	return movieBatch, movieData.IsFull()
+	return movieBatch, end + 1, end >= len(movieData.Slugs)
 }

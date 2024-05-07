@@ -10,7 +10,7 @@ import (
 
 var Threads int = 8
 var MaxUsers int = 100
-var ItemsToShow int = 10
+var ItemsToShow int = 8
 
 var Progress ProgressData = ProgressData{Percent: 0, Message: ""}
 
@@ -25,23 +25,13 @@ type Movie struct {
 }
 
 type RecommendationData struct {
-	Movie   Movie
-	Pointer int
-	Slugs   []string
+	Movie Movie
+	Slugs []string
 }
 
 type ProgressData struct {
 	Percent int
 	Message string
-}
-
-func (s *RecommendationData) Increment() int {
-	s.Pointer = min(s.Pointer+ItemsToShow, len(s.Slugs)) // how many movies at a time
-	return s.Pointer
-}
-
-func (s *RecommendationData) IsFull() bool {
-	return s.Pointer == len(s.Slugs)
 }
 
 func SerializeMovieData(movie Movie) string {
@@ -96,10 +86,10 @@ func FilterByPopularity(movies []Movie, popularity float64) []Movie {
 }
 
 // takes the total users for the movie and randomises which pages to scrape
-func RandomisePages(fans int) map[int]bool {
+func RandomisePages(fans int, maxUsers int) map[int]bool {
 	maxFans := min(256, fans/25) // letterboxd seems to have a maximum of 256 pages
 
-	pages := max(1, MaxUsers/25)
+	pages := max(1, maxUsers/25)
 
 	// select targetPages randomly between 1 and pages (no duplicates)
 	randomPages := make(map[int]bool)
